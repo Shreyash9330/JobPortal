@@ -413,24 +413,24 @@ This project demonstrates practical experience with:
 - Improved admin analytics
 - Automated testing
 
+
+
 ## 📸 Screenshots
 
-Add project screenshots here:
+### 💼 Home Page
+![Home Page](Home.png)
 
-### Home Page
-_Add screenshot here_
+### 🔎 Job Listing
+![Job Listing](jobs.png)
 
-### Job Listing
-_Add screenshot here_
+### 👤 Job Seeker Dashboard
+![Job Seeker Dashboard](jobseeker-dashboard.png)
 
-### Job Seeker Dashboard
-_Add screenshot here_
+### 🏢 Employer Dashboard
+![Employer Dashboard](employer-dashboard.png)
 
-### Employer Dashboard
-_Add screenshot here_
-
-### Admin Dashboard
-_Add screenshot here_
+### 👑 Admin Dashboard
+![Admin Dashboard](admin-dashboard.png)
 
 ## 👨‍💻 Author
 
