@@ -1,4 +1,4 @@
-# Job Portal
+# 💼 Job Portal
 
 A full-stack Job Portal web application built with **React.js, Spring Boot, Spring Security, JWT, Hibernate, and MySQL**.
 
