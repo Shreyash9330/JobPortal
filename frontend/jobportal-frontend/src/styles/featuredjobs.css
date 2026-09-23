@@ -1,0 +1,43 @@
+.featured-section {
+  padding: 70px 0;
+  background: #f8fafc;
+}
+
+/* Main content width */
+.featured-section .container {
+  width: 80%;
+  max-width: 1400px;
+}
+
+/* Section heading */
+.section-title h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.section-title p {
+  margin-bottom: 0;
+}
+
+/* Job grid */
+.featured-section .row {
+  align-items: stretch;
+}
+
+/* Mobile */
+@media (max-width: 991px) {
+  .featured-section .container {
+    width: 92%;
+  }
+}
+
+@media (max-width: 576px) {
+  .featured-section {
+    padding: 50px 0;
+  }
+
+  .featured-section .container {
+    width: 94%;
+  }
+}

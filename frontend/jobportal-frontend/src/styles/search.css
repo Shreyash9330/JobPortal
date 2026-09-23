@@ -1,0 +1,41 @@
+/* Search Section */
+.search-section {
+  padding: 35px 0;
+}
+
+.search-card {
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Input wrapper */
+.search-input {
+  position: relative;
+}
+
+/* Icons */
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Text input + select */
+.search-input .form-control,
+.search-input .form-select {
+  min-height: 52px;
+  padding-left: 46px;
+  border-radius: 10px;
+}
+
+/* Search button */
+.search-card .btn {
+  min-height: 52px;
+  border-radius: 10px;
+  font-weight: 600;
+}

@@ -1,0 +1,67 @@
+.job-card {
+  height: 100%;
+  padding: 18px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #eef0f4;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.job-header {
+  margin-bottom: 14px;
+}
+
+.job-header h5 {
+  font-size: 15px;
+  margin-bottom: 5px;
+}
+
+.job-header h4 {
+  font-size: 18px;
+  margin-bottom: 0;
+}
+
+.job-details {
+  margin-top: 12px;
+  margin-bottom: 14px;
+}
+
+.job-details p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.job-details .icon {
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+.job-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.job-skills span {
+  font-size: 12px;
+  padding: 5px 9px;
+  border-radius: 20px;
+}
+
+.job-card .btn {
+  margin-top: 14px !important;
+  padding: 9px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+}
