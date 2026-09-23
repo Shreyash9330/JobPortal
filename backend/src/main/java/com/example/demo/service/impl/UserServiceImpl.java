@@ -38,24 +38,20 @@ public class UserServiceImpl implements UserService {
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
-        System.out.println("EMAIL = " + email);
-
         if (optionalUser.isPresent()) {
 
             User user = optionalUser.get();
 
-            System.out.println("DB PASSWORD = " + user.getPassword());
-            System.out.println("INPUT PASSWORD = " + password);
-
-            boolean match =
-                    passwordEncoder.matches(password, user.getPassword());
-
-            System.out.println("MATCH = " + match);
+            boolean match = passwordEncoder.matches(
+                    password,
+                    user.getPassword()
+            );
 
             if (match) {
                 return jwtUtil.generateToken(
                         user.getEmail(),
-                        user.getRole());
+                        user.getRole()
+                );
             }
         }
 
