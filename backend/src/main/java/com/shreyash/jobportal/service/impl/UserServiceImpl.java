@@ -1,6 +1,6 @@
 package com.shreyash.jobportal.service.impl;
 
-
+import com.shreyash.jobportal.exception.DuplicateResourceException;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,7 +65,10 @@ public class UserServiceImpl implements UserService {
     
     @Override
     public User saveUser(User user) {
-
+    	
+    	if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new DuplicateResourceException("Email already registered");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         if (user.getRole() == null) {

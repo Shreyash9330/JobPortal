@@ -1,12 +1,13 @@
 package com.shreyash.jobportal.entity;
 
 
-import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shreyash.jobportal.enums.Role;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.*;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,11 +26,13 @@ public class User extends BaseEntity {
 	private String name;
 	@Column(unique = true)
 	private String email;
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
+	
 	@Enumerated(EnumType.STRING)
 	private Role role;
 	
-	private LocalDateTime createdAt;
+	
 	private boolean enabled = true;
 	
 	public String getEmail() {
@@ -41,13 +44,7 @@ public class User extends BaseEntity {
 	}
 
 	
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
+	
 
 	public boolean isEnabled() {
 		return enabled;

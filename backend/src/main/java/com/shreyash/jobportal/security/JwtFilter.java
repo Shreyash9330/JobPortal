@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
-import java.util.Collections;
+
 import java.util.List;
 import java.io.IOException;
 
@@ -46,20 +46,13 @@ public class JwtFilter extends OncePerRequestFilter {
                 String email = jwtUtil.extractEmail(token);
                 String role = jwtUtil.extractRole(token);
 
-                List<SimpleGrantedAuthority> authorities =
-                    List.of(new SimpleGrantedAuthority("ROLE_" + role));
-
-                UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(email, null, authorities);
-
-                SecurityContextHolder.getContext().setAuthentication(auth);
-                System.out.println("ROLE FROM TOKEN = " + role);
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        email, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
-
             } catch (Exception e) {
-                System.out.println("Invalid Token");
+                SecurityContextHolder.clearContext();
             }
         
         }
