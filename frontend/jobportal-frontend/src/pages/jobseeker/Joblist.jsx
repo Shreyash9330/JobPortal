@@ -18,7 +18,6 @@ function JobList() {
   const [applyingJobId, setApplyingJobId] = useState(null);
 
   const auth = getAuth();
-  const token = auth?.token;
   const email = auth?.email;
   const role = auth?.role || "";
 
@@ -42,9 +41,6 @@ function JobList() {
       const response = await axios.get(
         "http://localhost:8080/api/jobs/filter",
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
           params: {
             title: filters.search,
             location: filters.location,
@@ -174,20 +170,12 @@ function JobList() {
       const resumePath = uploadResponse.data;
 
       // Save Application
-      await axios.post(
-        "http://localhost:8080/api/applications",
-        {
-          jobId: jobId,
-          jobTitle: jobTitle,
-          userEmail: email,
-          resumePath: resumePath,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      await axios.post("http://localhost:8080/api/applications", {
+        jobId: jobId,
+        jobTitle: jobTitle,
+        userEmail: email,
+        resumePath: resumePath,
+      });
 
       setAppliedJobs((prev) => [...prev, jobId]);
       setResume(null);
@@ -205,7 +193,9 @@ function JobList() {
       Swal.fire({
         icon: "error",
         title: "Application Failed",
-        text: "Something went wrong. Please try again.",
+        text:
+          error.response?.data?.message ||
+          "Something went wrong. Please try again.",
         confirmButtonColor: "#dc3545",
       });
     } finally {
@@ -228,11 +218,7 @@ function JobList() {
     if (!result.isConfirmed) return;
 
     try {
-      await axios.delete(`http://localhost:8080/api/jobs/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.delete(`http://localhost:8080/api/jobs/${id}`);
 
       setJobs((prevJobs) => prevJobs.filter((job) => job.id !== id));
 
@@ -249,24 +235,9 @@ function JobList() {
       Swal.fire({
         icon: "error",
         title: "Delete Failed",
-        text: "Unable to delete the job.",
+        text: error.response?.data?.message || "Unable to delete the job.",
         confirmButtonColor: "#dc3545",
       });
-    }
-  };
-
-  const goToDashboard = () => {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    if (role === "ADMIN") {
-      navigate("/admin");
-    } else if (role === "EMPLOYER") {
-      navigate("/employer/dashboard");
-    } else {
-      navigate("/jobseeker");
     }
   };
 
@@ -309,11 +280,11 @@ function JobList() {
           </p>
         </div>
         <div className="d-flex gap-2 flex-wrap">
-          {(role === "EMPLOYER" || role === "ADMIN") && (
+          {role === "EMPLOYER" && (
             <>
               <button
                 className="btn btn-primary"
-                onClick={() => navigate("/view-applications")}
+                onClick={() => navigate("/employer/applications")}
               >
                 📄 View Applications
               </button>
@@ -321,6 +292,15 @@ function JobList() {
                 ➕ Add Job
               </Link>
             </>
+          )}
+
+          {role === "ADMIN" && (
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate("/admin/applications")}
+            >
+              📄 Applications
+            </button>
           )}
         </div>
       </div>
@@ -479,6 +459,12 @@ function JobList() {
               const isApplied = appliedJobs.includes(job.id);
               const isApplying = applyingJobId === job.id;
 
+              // Employer: only own jobs. Admin: every job (delete only).
+              const canManage =
+                role === "ADMIN" ||
+                (role === "EMPLOYER" &&
+                  job.employerEmail?.toLowerCase() === email?.toLowerCase());
+
               return (
                 <div className="col-xl-4 col-lg-6" key={job.id}>
                   <div className="card border-0 shadow-sm rounded-4 h-100">
@@ -585,15 +571,16 @@ function JobList() {
                       )}
 
                       {/* Employer/Admin Actions */}
-                      {(role === "EMPLOYER" || role === "ADMIN") && (
+                      {canManage && (
                         <div className="d-flex gap-2 mt-auto">
-                          <Link
-                            to={`/employer/edit-job/${job.id}`}
-                            className="btn btn-outline-primary flex-grow-1"
-                          >
-                            ✏️ Edit
-                          </Link>
-
+                          {role === "EMPLOYER" && (
+                            <Link
+                              to={`/employer/edit-job/${job.id}`}
+                              className="btn btn-outline-primary flex-grow-1"
+                            >
+                              ✏️ Edit
+                            </Link>
+                          )}
                           <button
                             className="btn btn-outline-danger flex-grow-1"
                             onClick={() => deleteJob(job.id)}

@@ -105,7 +105,7 @@ function App() {
         <Route
           path="/employer/add-job"
           element={
-            <ProtectedRoute role={["EMPLOYER", "ADMIN"]}>
+            <ProtectedRoute role="EMPLOYER">
               <AddJob />
             </ProtectedRoute>
           }
@@ -208,7 +208,7 @@ function App() {
         <Route
           path="/view-applications"
           element={
-            <ProtectedRoute role={["EMPLOYER", "ADMIN"]}>
+            <ProtectedRoute role={"ADMIN"}>
               <ViewApplications />
             </ProtectedRoute>
           }
