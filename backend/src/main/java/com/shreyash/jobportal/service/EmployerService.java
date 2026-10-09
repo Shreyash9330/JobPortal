@@ -12,6 +12,8 @@ public interface EmployerService {
     List<EmployerProfile> getAllEmployers();
 
     EmployerProfile getEmployerById(Long id);
+    
+    DashboardDTO getDashboard(String email);
 
     void deleteEmployer(Long id);
     DashboardDTO getDashboard();
