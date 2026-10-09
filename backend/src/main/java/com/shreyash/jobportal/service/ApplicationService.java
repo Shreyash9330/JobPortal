@@ -14,6 +14,8 @@ public interface ApplicationService {
 
     Application updateStatus(Long id, String status);
     
+    Application getApplicationById(Long id);
+    
     List<Application> getApplicationsByEmployer(String employerEmail);
     boolean hasApplied(Long jobId, String userEmail);
 }

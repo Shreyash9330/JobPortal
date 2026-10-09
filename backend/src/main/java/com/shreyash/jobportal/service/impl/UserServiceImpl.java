@@ -1,6 +1,5 @@
 package com.shreyash.jobportal.service.impl;
 
-import com.shreyash.jobportal.exception.DuplicateResourceException;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.shreyash.jobportal.entity.User;
 import com.shreyash.jobportal.enums.Role;
+import com.shreyash.jobportal.exception.DuplicateResourceException;
+import com.shreyash.jobportal.exception.InvalidCredentialsException;
 import com.shreyash.jobportal.repository.UserRepository;
 import com.shreyash.jobportal.security.JwtUtil;
 import com.shreyash.jobportal.service.UserService;
@@ -55,7 +56,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        return "Invalid credentials";
+        throw new InvalidCredentialsException("Invalid email or password");
     }
     
     @Override

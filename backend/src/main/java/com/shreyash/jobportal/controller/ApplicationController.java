@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,10 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.shreyash.jobportal.entity.Application;
+import com.shreyash.jobportal.entity.Job;
 import com.shreyash.jobportal.exception.ResourceNotFoundException;
+import com.shreyash.jobportal.security.AccessGuard;
 import com.shreyash.jobportal.service.ApplicationService;
-
-import org.springframework.beans.factory.annotation.Value;
+import com.shreyash.jobportal.service.JobService;
 
 @RestController
 @RequestMapping("/api/applications")
@@ -35,25 +38,24 @@ public class ApplicationController {
     @Autowired
     private ApplicationService applicationService;
     
+    @Autowired
+    private JobService jobService;
+    
     @Value("${app.upload-dir}")
     private String uploadDir;
     
     @GetMapping("/employer/{email}")
-    public List<Application> getApplicationsByEmployer(
-            @PathVariable String email) {
-    
-
+    public List<Application> getApplicationsByEmployer(@PathVariable String email, Authentication auth) {
+        AccessGuard.requireSelfOrAdmin(auth, email);
         return applicationService.getApplicationsByEmployer(email);
     }
-    
-    @GetMapping("/count/employer/{email}")
-    public long getEmployerApplicationCount(
-            @PathVariable String email) {
 
-        return applicationService
-                .getApplicationsByEmployer(email)
-                .size();
+    @GetMapping("/count/employer/{email}")
+    public long getEmployerApplicationCount(@PathVariable String email, Authentication auth) {
+        AccessGuard.requireSelfOrAdmin(auth, email);
+        return applicationService.getApplicationsByEmployer(email).size();
     }
+
     
     @GetMapping("/resume/{fileName}")
     public ResponseEntity<Resource> viewResume(@PathVariable String fileName) throws Exception {
@@ -74,12 +76,11 @@ public class ApplicationController {
     }
     
     @PostMapping
-    public Application applyJob(@RequestBody Application application) {
-
-        System.out.println("JOB TITLE RECEIVED = " + application.getJobTitle());
-
+    public Application applyJob(@RequestBody Application application, Authentication auth) {
+        application.setUserEmail(auth.getName());
         return applicationService.applyJob(application);
     }
+
 
     @GetMapping
     public List<Application> getAllApplications() {
@@ -88,17 +89,16 @@ public class ApplicationController {
     }
 
     @GetMapping("/user/{email}")
-    public List<Application> getApplicationsByUser(
-            @PathVariable String email) {
-
+    public List<Application> getApplicationsByUser(@PathVariable String email, Authentication auth) {
+        AccessGuard.requireSelfOrAdmin(auth, email);
         return applicationService.getApplicationsByUser(email);
     }
-    
-    @PutMapping("/{id}/status")
-    public Application updateStatus(
-            @PathVariable Long id,
-            @RequestParam String status) {
 
+    @PutMapping("/{id}/status")
+    public Application updateStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
+        Application application = applicationService.getApplicationById(id);
+        Job job = jobService.getJobById(application.getJobId());
+        AccessGuard.requireSelfOrAdmin(auth, job.getEmployerEmail());
         return applicationService.updateStatus(id, status);
     }
     
@@ -126,10 +126,8 @@ public class ApplicationController {
     }
     
     @GetMapping("/check")
-    public boolean hasApplied(
-            @RequestParam Long jobId,
-            @RequestParam String email) {
-
+    public boolean hasApplied(@RequestParam Long jobId, @RequestParam String email, Authentication auth) {
+        AccessGuard.requireSelfOrAdmin(auth, email);
         return applicationService.hasApplied(jobId, email);
     }
 }

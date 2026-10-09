@@ -48,11 +48,16 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/applications/resume/**").permitAll()
 
                 // employer
+                
+                .requestMatchers(HttpMethod.GET, "/api/employer").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/employer/{id}").hasRole("ADMIN")
+                .requestMatchers("/api/employer/**").hasRole("EMPLOYER")
                 .requestMatchers(HttpMethod.GET, "/api/jobs/employer/**",
                         "/api/jobs/count/employer/**").hasRole("EMPLOYER")
                 .requestMatchers(HttpMethod.POST, "/api/jobs").hasRole("EMPLOYER")
                 .requestMatchers(HttpMethod.PUT, "/api/jobs/{id}").hasRole("EMPLOYER")
-                .requestMatchers(HttpMethod.DELETE, "/api/jobs/{id}").hasAnyRole("EMPLOYER", "ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/jobs/{id}")
+                        .hasAnyRole("EMPLOYER", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/applications/employer/**",
                         "/api/applications/count/employer/**").hasRole("EMPLOYER")
                 .requestMatchers(HttpMethod.PUT, "/api/applications/{id}/status")
@@ -69,7 +74,6 @@ public class SecurityConfig {
                         "/api/applications/count").hasRole("ADMIN")
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
 
-                // baaki sab (jaise /api/employer/**) kam se kam login maangte hain
                 .anyRequest().authenticated()
             );
 
