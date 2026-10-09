@@ -27,25 +27,22 @@ function AdminDashboard() {
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const [
-          usersResponse,
-          employersResponse,
-          jobsResponse,
-          applicationsResponse,
-        ] = await Promise.all([
+        const results = await Promise.allSettled([
           axios.get("http://localhost:8080/api/users/count"),
           axios.get("http://localhost:8080/api/employer"),
           axios.get("http://localhost:8080/api/jobs/count"),
           axios.get("http://localhost:8080/api/applications/count"),
         ]);
 
+        const [u, e, j, a] = results.map((r) =>
+          r.status === "fulfilled" ? r.value.data : null,
+        );
+
         setStats({
-          users: Number(usersResponse.data) || 0,
-          employers: Array.isArray(employersResponse.data)
-            ? employersResponse.data.length
-            : 0,
-          jobs: Number(jobsResponse.data) || 0,
-          applications: Number(applicationsResponse.data) || 0,
+          users: Number(u) || 0,
+          employers: Array.isArray(e) ? e.length : 0,
+          jobs: Number(j) || 0,
+          applications: Number(a) || 0,
         });
       } catch (error) {
         console.log("Admin Dashboard Error:", error);

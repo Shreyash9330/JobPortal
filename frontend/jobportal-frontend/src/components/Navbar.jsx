@@ -1,23 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { getAuth, clearAuth } from "../utils/auth";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token");
-
-  let role = "";
-
-  if (token) {
-    try {
-      const decoded = jwtDecode(token);
-      role = decoded.role;
-    } catch {
-      role = "";
-    }
-  }
+  const auth = getAuth();
+  const token = auth?.token;
+  const role = auth?.role || "";
 
   const closeMenu = () => {
     setMenuOpen(false);
@@ -35,9 +26,7 @@ function Navbar() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("email");
-    localStorage.removeItem("role");
+    clearAuth();
 
     closeMenu();
     navigate("/");

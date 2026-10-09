@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import { getAuth } from "../../utils/auth";
 import Swal from "sweetalert2";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
@@ -17,25 +17,16 @@ function JobList() {
   const [loading, setLoading] = useState(true);
   const [applyingJobId, setApplyingJobId] = useState(null);
 
-  const token = localStorage.getItem("token");
-  const email = localStorage.getItem("email");
+  const auth = getAuth();
+  const token = auth?.token;
+  const email = auth?.email;
+  const role = auth?.role || "";
 
   const locationState = useLocation();
 
   const [search, setSearch] = useState(locationState.state?.search || "");
 
   const [location, setLocation] = useState(locationState.state?.location || "");
-  // Get user role from JWT
-  let role = "";
-
-  if (token && token.includes(".")) {
-    try {
-      const decoded = jwtDecode(token);
-      role = decoded.role;
-    } catch (error) {
-      console.log("Invalid token");
-    }
-  }
 
   const fetchJobs = async (
     filters = {
@@ -317,48 +308,18 @@ function JobList() {
             Find the right opportunity for your career.
           </p>
         </div>
-        <div className="d-flex gap-2 mb-4 flex-wrap">
+        <div className="d-flex gap-2 flex-wrap">
           {(role === "EMPLOYER" || role === "ADMIN") && (
-            <button
-              className="btn btn-primary"
-              onClick={() => navigate("/view-applications")}
-            >
-              📄 View Applications
-            </button>
-          )}
-
-          {token && (
             <>
-              <button className="btn btn-secondary" onClick={goToDashboard}>
-                Dashboard
-              </button>
-
-              {role === "JOBSEEKER" && (
-                <button
-                  className="btn btn-info"
-                  onClick={() => navigate("/my-applications")}
-                >
-                  📄 My Applications
-                </button>
-              )}
-
-              {(role === "EMPLOYER" || role === "ADMIN") && (
-                <Link to="/employer/add-job">
-                  <button className="btn btn-success">➕ Add Job</button>
-                </Link>
-              )}
-
               <button
-                className="btn btn-danger"
-                onClick={() => {
-                  localStorage.removeItem("token");
-                  localStorage.removeItem("email");
-                  localStorage.removeItem("role");
-                  navigate("/");
-                }}
+                className="btn btn-primary"
+                onClick={() => navigate("/view-applications")}
               >
-                Logout
+                📄 View Applications
               </button>
+              <Link to="/employer/add-job" className="btn btn-success">
+                ➕ Add Job
+              </Link>
             </>
           )}
         </div>
@@ -408,6 +369,7 @@ function JobList() {
                 <option value="Full Time">Full Time</option>
                 <option value="Part Time">Part Time</option>
                 <option value="Internship">Internship</option>
+                <option value="Contract">Contract</option>
                 <option value="Remote">Remote</option>
               </select>
             </div>
@@ -420,6 +382,7 @@ function JobList() {
                 value={experience}
                 onChange={(e) => setExperience(e.target.value)}
               >
+                <option value="">Any Experience</option>
                 <option value="0">Fresher (less than 1 year)</option>
                 <option value="1">1 year</option>
                 <option value="2">2 years</option>
