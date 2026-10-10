@@ -11,6 +11,7 @@ import {
   FaEyeSlash,
   FaArrowRight,
 } from "react-icons/fa";
+<Link to="/forgot-password">Forgot Password?</Link>;
 
 function Login() {
   const [email, setEmail] = useState("");

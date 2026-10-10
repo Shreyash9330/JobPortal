@@ -27,6 +27,7 @@ import ViewApplications from "./pages/employer/ViewApplications";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminApplications from "./pages/admin/AdminApplications";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 
 function PublicLayout({ children }) {
   return (
@@ -193,6 +194,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* ================= LEGACY / SHARED ROUTES ================= */}
 
