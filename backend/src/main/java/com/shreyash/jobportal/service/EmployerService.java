@@ -1,3 +1,4 @@
+
 package com.shreyash.jobportal.service;
 
 import java.util.List;
@@ -12,11 +13,12 @@ public interface EmployerService {
     List<EmployerProfile> getAllEmployers();
 
     EmployerProfile getEmployerById(Long id);
-    
+
     DashboardDTO getDashboard(String email);
 
     void deleteEmployer(Long id);
-    DashboardDTO getDashboard();
+
     EmployerProfile getEmployerByEmail(String email);
+
     EmployerProfile updateEmployer(Long id, EmployerProfile employer);
 }

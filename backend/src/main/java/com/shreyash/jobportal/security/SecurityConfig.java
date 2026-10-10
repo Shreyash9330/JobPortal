@@ -14,11 +14,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtFilter jwtFilter;
+	@Autowired
+	private JwtUtil jwtUtil;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -78,8 +81,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             );
 
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
+        http.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
