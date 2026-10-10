@@ -28,10 +28,10 @@ function AdminDashboard() {
     const loadStats = async () => {
       try {
         const results = await Promise.allSettled([
-          axios.get("http://localhost:8080/api/users/count"),
-          axios.get("http://localhost:8080/api/employer"),
-          axios.get("http://localhost:8080/api/jobs/count"),
-          axios.get("http://localhost:8080/api/applications/count"),
+          axios.get("/api/users/count"),
+          axios.get("/api/employer"),
+          axios.get("/api/jobs/count"),
+          axios.get("/api/applications/count"),
         ]);
 
         const [u, e, j, a] = results.map((r) =>

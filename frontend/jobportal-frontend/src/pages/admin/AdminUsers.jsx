@@ -15,7 +15,7 @@ function AdminUsers() {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/users");
+      const response = await axios.get("/api/users");
       setUsers(response.data);
     } catch (error) {
       console.log("Users Error:", error);
@@ -45,7 +45,7 @@ function AdminUsers() {
     if (!result.isConfirmed) return;
 
     try {
-      await axios.delete(`http://localhost:8080/api/users/${id}`);
+      await axios.delete(`/api/users/${id}`);
 
       setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
 

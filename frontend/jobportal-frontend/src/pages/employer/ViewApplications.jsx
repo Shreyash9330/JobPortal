@@ -1,3 +1,4 @@
+import { API_URL } from "../../config";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -8,7 +9,7 @@ function ViewApplications() {
     const loadApplications = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8080/api/applications",
+          "/api/applications",
         );
 
         setApplications(response.data);
@@ -23,7 +24,7 @@ function ViewApplications() {
   const updateStatus = async (id, status) => {
     try {
       await axios.put(
-        `http://localhost:8080/api/applications/${id}/status?status=${status}`,
+        `/api/applications/${id}/status?status=${status}`,
       );
 
       alert("Status Updated");
@@ -87,7 +88,7 @@ function ViewApplications() {
             <strong>Resume:</strong>
 
             <a
-              href={`http://localhost:8080/uploads/${app.resumePath}`}
+              href={`${API_URL}/uploads/${app.resumePath}`}
               target="_blank"
               rel="noreferrer"
             >

@@ -1,3 +1,4 @@
+import { API_URL } from "../../config";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -19,7 +20,7 @@ function MyApplications() {
   const loadApplications = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/applications/user/${email}`,
+        `/api/applications/user/${email}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -146,7 +147,7 @@ function MyApplications() {
                       <td>
                         {app.resumePath ? (
                           <a
-                            href={`http://localhost:8080/api/applications/resume/${app.resumePath}`}
+                            href={`${API_URL}/api/applications/resume/${app.resumePath}`}
                             target="_blank"
                             rel="noreferrer"
                             className="btn btn-primary btn-sm"

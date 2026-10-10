@@ -1,3 +1,4 @@
+import { API_URL } from "../../config";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -19,7 +20,7 @@ function EmployerApplications() {
   const fetchApplications = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/applications/employer/${employerEmail}`,
+        `/api/applications/employer/${employerEmail}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -60,7 +61,7 @@ function EmployerApplications() {
 
     try {
       const response = await axios.put(
-        `http://localhost:8080/api/applications/${id}/status?status=${status}`,
+        `/api/applications/${id}/status?status=${status}`,
         {},
         {
           headers: {
@@ -196,7 +197,7 @@ function EmployerApplications() {
                         <td>
                           {app.resumePath ? (
                             <a
-                              href={`http://localhost:8080/api/applications/resume/${app.resumePath}`}
+                              href={`${API_URL}/api/applications/resume/${app.resumePath}`}
                               target="_blank"
                               rel="noreferrer"
                               className="btn btn-outline-primary btn-sm"

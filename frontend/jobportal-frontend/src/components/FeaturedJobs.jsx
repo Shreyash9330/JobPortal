@@ -15,7 +15,7 @@ function FeaturedJobs() {
         setLoading(true);
         setError(false);
 
-        const response = await axios.get("http://localhost:8080/api/jobs");
+        const response = await axios.get("/api/jobs");
 
         // Latest 6 jobs
         const latestJobs = response.data.slice().reverse().slice(0, 6);

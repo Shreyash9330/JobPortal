@@ -18,10 +18,10 @@ function Stats() {
       try {
         const [usersRes, companiesRes, jobsRes, applicationsRes] =
           await Promise.all([
-            axios.get("http://localhost:8080/api/users/count"),
-            axios.get("http://localhost:8080/api/employer"),
-            axios.get("http://localhost:8080/api/jobs/count"),
-            axios.get("http://localhost:8080/api/applications/count"),
+            axios.get("/api/users/count"),
+            axios.get("/api/employer"),
+            axios.get("/api/jobs/count"),
+            axios.get("/api/applications/count"),
           ]);
 
         setStats({

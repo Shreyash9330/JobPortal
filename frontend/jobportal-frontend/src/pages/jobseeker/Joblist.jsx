@@ -39,7 +39,7 @@ function JobList() {
       setLoading(true);
 
       const response = await axios.get(
-        "http://localhost:8080/api/jobs/filter",
+        "/api/jobs/filter",
         {
           params: {
             title: filters.search,
@@ -56,7 +56,7 @@ function JobList() {
       if (email && role === "JOBSEEKER") {
         const results = await Promise.all(
           response.data.map((job) =>
-            axios.get("http://localhost:8080/api/applications/check", {
+            axios.get("/api/applications/check", {
               params: {
                 jobId: job.id,
                 email: email,
@@ -163,14 +163,14 @@ function JobList() {
 
       // Upload Resume
       const uploadResponse = await axios.post(
-        "http://localhost:8080/api/applications/upload",
+        "/api/applications/upload",
         formData,
       );
 
       const resumePath = uploadResponse.data;
 
       // Save Application
-      await axios.post("http://localhost:8080/api/applications", {
+      await axios.post("/api/applications", {
         jobId: jobId,
         jobTitle: jobTitle,
         userEmail: email,
@@ -218,7 +218,7 @@ function JobList() {
     if (!result.isConfirmed) return;
 
     try {
-      await axios.delete(`http://localhost:8080/api/jobs/${id}`);
+      await axios.delete(`/api/jobs/${id}`);
 
       setJobs((prevJobs) => prevJobs.filter((job) => job.id !== id));
 

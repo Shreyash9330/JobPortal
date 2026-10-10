@@ -1,0 +1,6 @@
+target
+uploads
+.git
+.settings
+.project
+.classpath

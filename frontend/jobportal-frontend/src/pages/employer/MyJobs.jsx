@@ -19,7 +19,7 @@ function MyJobs() {
   const fetchJobs = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/jobs/employer/${employerEmail}`,
+        `/api/jobs/employer/${employerEmail}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

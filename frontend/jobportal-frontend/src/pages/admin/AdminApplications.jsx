@@ -1,3 +1,4 @@
+import { API_URL } from "../../config";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -16,7 +17,7 @@ function AdminApplications() {
   const fetchApplications = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8080/api/applications",
+        "/api/applications",
       );
 
       setApplications(response.data);
@@ -121,7 +122,7 @@ function AdminApplications() {
                       <td>
                         {app.resumePath ? (
                           <a
-                            href={`http://localhost:8080/api/applications/resume/${app.resumePath}`}
+                            href={`${API_URL}/api/applications/resume/${app.resumePath}`}
                             target="_blank"
                             rel="noreferrer"
                             className="btn btn-outline-primary btn-sm"

@@ -72,7 +72,7 @@ function Register() {
     }
 
     try {
-      await axios.post("http://localhost:8080/api/users", user);
+      await axios.post("/api/users", user);
 
       alert("Registration Successful");
       navigate("/login");

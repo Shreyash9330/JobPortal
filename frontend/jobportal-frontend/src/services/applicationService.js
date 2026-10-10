@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:8080/api/applications";
+const API = "/api/applications";
 
 export const getEmployerApplications = (email, token) => {
   return axios.get(`${API}/employer/${email}`, {

@@ -1,3 +1,4 @@
+import { API_URL } from "../../config";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -21,7 +22,7 @@ function JobSeekerDashboard() {
         }
 
         const response = await axios.get(
-          `http://localhost:8080/api/applications/user/${email}`,
+          `/api/applications/user/${email}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -240,7 +241,7 @@ function JobSeekerDashboard() {
                       <td>
                         {app.resumePath ? (
                           <a
-                            href={`http://localhost:8080/api/applications/resume/${app.resumePath}`}
+                            href={`${API_URL}/api/applications/resume/${app.resumePath}`}
                             target="_blank"
                             rel="noreferrer"
                             className="btn btn-sm btn-primary"

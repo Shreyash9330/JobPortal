@@ -21,11 +21,11 @@ function EmployerDashboard() {
         };
 
         const [jobsResponse, applicationsResponse] = await Promise.all([
-          axios.get(`http://localhost:8080/api/jobs/employer/${email}`, {
+          axios.get(`/api/jobs/employer/${email}`, {
             headers,
           }),
           axios.get(
-            `http://localhost:8080/api/applications/employer/${email}`,
+            `/api/applications/employer/${email}`,
             { headers },
           ),
         ]);

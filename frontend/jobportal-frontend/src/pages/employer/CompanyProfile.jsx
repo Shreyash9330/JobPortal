@@ -14,7 +14,7 @@ function CompanyProfile() {
         const token = localStorage.getItem("token");
 
         const response = await axios.get(
-          `http://localhost:8080/api/employer/profile/${email}`,
+          `/api/employer/profile/${email}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

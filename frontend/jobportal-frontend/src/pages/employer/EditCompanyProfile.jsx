@@ -30,7 +30,7 @@ function EditCompanyProfile() {
   const loadProfile = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/employer/profile/${email}`,
+        `/api/employer/profile/${email}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -75,7 +75,7 @@ function EditCompanyProfile() {
       setUpdating(true);
 
       await axios.put(
-        `http://localhost:8080/api/employer/${profile.id}`,
+        `/api/employer/${profile.id}`,
         profile,
         {
           headers: {

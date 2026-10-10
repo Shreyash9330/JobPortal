@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:8080/api/jobs";
+const API = "/api/jobs";
 
 export const deleteJob = (id, token) => {
   return axios.delete(`${API}/${id}`, {

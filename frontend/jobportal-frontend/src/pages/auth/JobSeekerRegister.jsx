@@ -113,7 +113,7 @@ function JobSeekerRegister() {
     try {
       setLoading(true);
 
-      await axios.post("http://localhost:8080/api/users", user);
+      await axios.post("/api/users", user);
 
       await Swal.fire({
         icon: "success",

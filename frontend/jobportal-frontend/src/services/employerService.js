@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:8080/api/employer";
+const API = "/api/employer";
 
 export const getEmployerDashboard = () => {
   return axios.get(`${API}/dashboard`);

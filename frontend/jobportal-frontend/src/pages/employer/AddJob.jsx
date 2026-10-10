@@ -46,7 +46,7 @@ function AddJob() {
 
       const token = localStorage.getItem("token");
 
-      await axios.post("http://localhost:8080/api/jobs", job, {
+      await axios.post("/api/jobs", job, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

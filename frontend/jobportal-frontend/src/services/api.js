@@ -1,5 +1,7 @@
 import axios from "axios";
+import { API_URL } from "../config";
 
+axios.defaults.baseURL = API_URL;
 const TOKEN_KEY = "token";
 
 axios.interceptors.request.use((config) => {

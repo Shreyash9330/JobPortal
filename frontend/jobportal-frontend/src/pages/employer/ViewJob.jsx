@@ -15,7 +15,7 @@ function ViewJob() {
         const token = localStorage.getItem("token");
 
         const response = await axios.get(
-          `http://localhost:8080/api/jobs/${id}`,
+          `/api/jobs/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
