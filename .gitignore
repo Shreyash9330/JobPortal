@@ -13,7 +13,7 @@ backend/.env.*
 !backend/.env.example
 
 # Sensitive application config
-backend/src/main/resources/application.properties
+Select-String -Path backend\src\main\resources\application.properties -Pattern "password|secret|url"
 
 # IDE files
 .vscode/
