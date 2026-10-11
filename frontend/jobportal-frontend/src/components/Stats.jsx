@@ -1,95 +1,66 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaUsers, FaBuilding, FaBriefcase, FaFileAlt } from "react-icons/fa";
-import "../styles/stats.css";
+import "../styles/home.css";
+
+const toCount = (data) =>
+  Array.isArray(data) ? data.length : Number(data) || 0;
 
 function Stats() {
-  const [stats, setStats] = useState({
-    users: 0,
-    companies: 0,
-    jobs: 0,
-    applications: 0,
-  });
-
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    const loadStats = async () => {
-      try {
-        const [usersRes, companiesRes, jobsRes, applicationsRes] =
-          await Promise.all([
-            axios.get("/api/users/count"),
-            axios.get("/api/employer"),
-            axios.get("/api/jobs/count"),
-            axios.get("/api/applications/count"),
-          ]);
+    const load = async () => {
+      const results = await Promise.allSettled([
+        axios.get("/api/users/count"),
+        axios.get("/api/employer"),
+        axios.get("/api/jobs/count"),
+        axios.get("/api/applications/count"),
+      ]);
 
-        setStats({
-          users: Number(usersRes.data) || 0,
-          companies: Array.isArray(companiesRes.data)
-            ? companiesRes.data.length
-            : 0,
-          jobs: Number(jobsRes.data) || 0,
-          applications: Number(applicationsRes.data) || 0,
-        });
-      } catch (error) {
-        console.log("Stats Error:", error);
-      } finally {
-        setLoading(false);
-      }
+      const value = (r) =>
+        r.status === "fulfilled" ? toCount(r.value.data) : null;
+
+      setStats([
+        { label: "Registered users", value: value(results[0]) },
+        { label: "Employers", value: value(results[1]) },
+        { label: "Jobs posted", value: value(results[2]) },
+        { label: "Applications", value: value(results[3]) },
+      ]);
     };
 
-    loadStats();
+    load();
   }, []);
 
-  const statItems = [
-    {
-      icon: <FaUsers />,
-      value: stats.users,
-      label: "Registered Users",
-    },
-    {
-      icon: <FaBuilding />,
-      value: stats.companies,
-      label: "Companies",
-    },
-    {
-      icon: <FaBriefcase />,
-      value: stats.jobs,
-      label: "Jobs Posted",
-    },
-    {
-      icon: <FaFileAlt />,
-      value: stats.applications,
-      label: "Applications",
-    },
-  ];
+  if (stats && stats.every((s) => s.value === null)) return null;
 
   return (
-    <section className="stats-section">
-      <div className="container">
-        <div className="text-center mb-5">
-          <p className="text-primary fw-semibold mb-2">Platform Overview</p>
-
-          <h2 className="fw-bold mb-2">JobPortal at a Glance</h2>
-
-          <p className="text-muted mb-0">
-            Real-time platform statistics from our database.
-          </p>
+    <section className="hm-stats">
+      <div className="hm-container">
+        <div className="hm-head light">
+          <h2>JobPortal at a glance</h2>
+          <p>Live numbers straight from the database.</p>
         </div>
 
-        <div className="row g-4">
-          {statItems.map((item, index) => (
-            <div className="col-lg-3 col-md-6" key={index}>
-              <div className="stat-card h-100">
-                <div className="stat-icon">{item.icon}</div>
-
-                <h3>{loading ? "..." : item.value.toLocaleString("en-IN")}</h3>
-
-                <p>{item.label}</p>
+        <div className="hm-stats-grid">
+          {(stats || [0, 1, 2, 3]).map((item, i) =>
+            item.value === null ? null : (
+              <div className="hm-stat" key={item.label || i}>
+                {stats ? (
+                  <>
+                    <div className="hm-stat-n">
+                      {item.value.toLocaleString("en-IN")}
+                    </div>
+                    <div className="hm-stat-l">{item.label}</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="hm-skel-line big" />
+                    <div className="hm-skel-line" />
+                  </>
+                )}
               </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       </div>
     </section>

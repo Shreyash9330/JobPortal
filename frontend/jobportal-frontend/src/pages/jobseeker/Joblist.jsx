@@ -1,93 +1,95 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { getAuth } from "../../utils/auth";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { getAuth } from "../../utils/auth";
+import JobListingCard, {
+  JobCardSkeleton,
+} from "../../components/JobListingCard";
+import "../../styles/joblist.css";
 
 function JobList() {
   const navigate = useNavigate();
-
-  const [jobs, setJobs] = useState([]);
-
-  const [jobType, setJobType] = useState("");
-  const [experience, setExperience] = useState("");
-
-  const [resume, setResume] = useState(null);
-  const [appliedJobs, setAppliedJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [applyingJobId, setApplyingJobId] = useState(null);
+  const routerLocation = useLocation();
 
   const auth = getAuth();
   const email = auth?.email;
   const role = auth?.role || "";
 
-  const locationState = useLocation();
+  const [jobs, setJobs] = useState([]);
+  const [search, setSearch] = useState(routerLocation.state?.search || "");
+  const [location, setLocation] = useState(
+    routerLocation.state?.location || "",
+  );
+  const [jobType, setJobType] = useState("");
+  const [experience, setExperience] = useState("");
 
-  const [search, setSearch] = useState(locationState.state?.search || "");
+  const [loading, setLoading] = useState(true);
+  const [slow, setSlow] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
-  const [location, setLocation] = useState(locationState.state?.location || "");
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const [applyTarget, setApplyTarget] = useState(null);
+  const [resume, setResume] = useState(null);
+  const [applying, setApplying] = useState(false);
+
+  const markApplied = async (list) => {
+    if (!email || role !== "JOBSEEKER" || list.length === 0) {
+      setAppliedJobs([]);
+      return;
+    }
+    try {
+      const results = await Promise.all(
+        list.map((job) =>
+          axios.get("/api/applications/check", {
+            params: { jobId: job.id, email },
+          }),
+        ),
+      );
+      setAppliedJobs(
+        list.filter((job, i) => results[i].data).map((job) => job.id),
+      );
+    } catch (error) {
+      console.log("Applied check error:", error);
+    }
+  };
 
   const fetchJobs = async (
-    filters = {
-      search,
-      location,
-      jobType,
-      experience,
-    },
+    filters = { search, location, jobType, experience },
   ) => {
+    let wake;
     try {
       setLoading(true);
+      setLoadError(false);
+      wake = setTimeout(() => setSlow(true), 4000);
 
-      const response = await axios.get(
-        "/api/jobs/filter",
-        {
-          params: {
-            title: filters.search,
-            location: filters.location,
-            jobType: filters.jobType,
-            experience: filters.experience,
-          },
+      const response = await axios.get("/api/jobs/filter", {
+        params: {
+          title: filters.search,
+          location: filters.location,
+          jobType: filters.jobType,
+          experience: filters.experience,
         },
-      );
+      });
 
       setJobs(response.data);
+      clearTimeout(wake);
+      setSlow(false);
+      setLoading(false);
 
-      // Check already applied jobs
-      if (email && role === "JOBSEEKER") {
-        const results = await Promise.all(
-          response.data.map((job) =>
-            axios.get("/api/applications/check", {
-              params: {
-                jobId: job.id,
-                email: email,
-              },
-            }),
-          ),
-        );
-
-        const applied = response.data
-          .map((job, index) => (results[index].data ? job.id : null))
-          .filter((id) => id !== null);
-
-        setAppliedJobs(applied);
-      } else {
-        setAppliedJobs([]);
-      }
+      await markApplied(response.data);
     } catch (error) {
       console.log("Fetch Jobs Error:", error);
-
-      Swal.fire({
-        icon: "error",
-        title: "Unable to Load Jobs",
-        text: "Something went wrong while loading jobs.",
-        confirmButtonColor: "#dc3545",
-      });
+      setLoadError(true);
     } finally {
+      clearTimeout(wake);
+      setSlow(false);
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchJobs();
     // Initial load only
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,29 +103,25 @@ function JobList() {
       return;
     }
 
-    // PDF validation
     if (file.type !== "application/pdf") {
       Swal.fire({
         icon: "warning",
         title: "Invalid Resume",
         text: "Please upload your resume in PDF format.",
-        confirmButtonColor: "#0d6efd",
+        confirmButtonColor: "#2f5bea",
       });
-
       e.target.value = "";
       setResume(null);
       return;
     }
 
-    // 5 MB limit
     if (file.size > 5 * 1024 * 1024) {
       Swal.fire({
         icon: "warning",
         title: "File Too Large",
         text: "Resume size should be less than 5 MB.",
-        confirmButtonColor: "#0d6efd",
+        confirmButtonColor: "#2f5bea",
       });
-
       e.target.value = "";
       setResume(null);
       return;
@@ -132,52 +130,50 @@ function JobList() {
     setResume(file);
   };
 
-  const applyJob = async (jobId, jobTitle) => {
+  const openApply = (job) => {
     if (!email) {
       Swal.fire({
         icon: "warning",
         title: "Login Required",
         text: "Please login before applying for a job.",
-        confirmButtonColor: "#0d6efd",
+        confirmButtonColor: "#2f5bea",
       });
-
       navigate("/login");
       return;
     }
+    setResume(null);
+    setApplyTarget(job);
+  };
 
-    if (!resume) {
-      Swal.fire({
-        icon: "warning",
-        title: "Resume Required",
-        text: "Please select your PDF resume before applying.",
-        confirmButtonColor: "#0d6efd",
-      });
-      return;
-    }
+  const closeApply = () => {
+    if (applying) return;
+    setApplyTarget(null);
+    setResume(null);
+  };
+
+  const submitApplication = async () => {
+    if (!applyTarget || !resume) return;
 
     try {
-      setApplyingJobId(jobId);
+      setApplying(true);
 
       const formData = new FormData();
       formData.append("file", resume);
 
-      // Upload Resume
       const uploadResponse = await axios.post(
         "/api/applications/upload",
         formData,
       );
 
-      const resumePath = uploadResponse.data;
-
-      // Save Application
       await axios.post("/api/applications", {
-        jobId: jobId,
-        jobTitle: jobTitle,
+        jobId: applyTarget.id,
+        jobTitle: applyTarget.title,
         userEmail: email,
-        resumePath: resumePath,
+        resumePath: uploadResponse.data,
       });
 
-      setAppliedJobs((prev) => [...prev, jobId]);
+      setAppliedJobs((prev) => [...prev, applyTarget.id]);
+      setApplyTarget(null);
       setResume(null);
 
       Swal.fire({
@@ -189,17 +185,16 @@ function JobList() {
       });
     } catch (error) {
       console.log("Apply Error:", error);
-
       Swal.fire({
         icon: "error",
         title: "Application Failed",
         text:
           error.response?.data?.message ||
           "Something went wrong. Please try again.",
-        confirmButtonColor: "#dc3545",
+        confirmButtonColor: "#e5484d",
       });
     } finally {
-      setApplyingJobId(null);
+      setApplying(false);
     }
   };
 
@@ -209,7 +204,7 @@ function JobList() {
       text: "This job will be permanently deleted.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#dc3545",
+      confirmButtonColor: "#e5484d",
       cancelButtonColor: "#6c757d",
       confirmButtonText: "Yes, Delete",
       cancelButtonText: "Cancel",
@@ -219,9 +214,7 @@ function JobList() {
 
     try {
       await axios.delete(`/api/jobs/${id}`);
-
-      setJobs((prevJobs) => prevJobs.filter((job) => job.id !== id));
-
+      setJobs((prev) => prev.filter((job) => job.id !== id));
       Swal.fire({
         icon: "success",
         title: "Deleted!",
@@ -231,12 +224,11 @@ function JobList() {
       });
     } catch (error) {
       console.log("Delete Job Error:", error);
-
       Swal.fire({
         icon: "error",
         title: "Delete Failed",
         text: error.response?.data?.message || "Unable to delete the job.",
-        confirmButtonColor: "#dc3545",
+        confirmButtonColor: "#e5484d",
       });
     }
   };
@@ -246,219 +238,171 @@ function JobList() {
     setLocation("");
     setJobType("");
     setExperience("");
-
-    fetchJobs({
-      search: "",
-      location: "",
-      jobType: "",
-      experience: "",
-    });
+    fetchJobs({ search: "", location: "", jobType: "", experience: "" });
   };
 
-  const getStatusBadge = (status) => {
-    const currentStatus = status?.toUpperCase();
-
-    if (currentStatus === "ACTIVE") {
-      return <span className="badge bg-success">ACTIVE</span>;
-    }
-
-    if (currentStatus === "CLOSED") {
-      return <span className="badge bg-danger">CLOSED</span>;
-    }
-
-    return null;
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchJobs({ search, location, jobType, experience });
   };
 
   return (
-    <div className="container-fluid py-4 px-3 px-lg-5">
+    <div className="jl-page">
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div className="jl-top">
         <div>
-          <h1 className="fw-bold mb-1">💼 All Jobs</h1>
-          <p className="text-muted mb-0">
-            Find the right opportunity for your career.
-          </p>
+          <h1>Find your next role</h1>
+          <p>Browse openings and apply in a couple of clicks.</p>
         </div>
-        <div className="d-flex gap-2 flex-wrap">
+
+        <div className="jl-top-actions">
           {role === "EMPLOYER" && (
             <>
               <button
-                className="btn btn-primary"
+                type="button"
+                className="jl-btn ghost"
                 onClick={() => navigate("/employer/applications")}
               >
-                📄 View Applications
+                View applications
               </button>
-              <Link to="/employer/add-job" className="btn btn-success">
-                ➕ Add Job
+              <Link to="/employer/add-job" className="jl-btn primary">
+                + Add job
               </Link>
             </>
           )}
-
           {role === "ADMIN" && (
             <button
-              className="btn btn-primary"
+              type="button"
+              className="jl-btn ghost"
               onClick={() => navigate("/admin/applications")}
             >
-              📄 Applications
+              Applications
             </button>
           )}
         </div>
       </div>
 
       {/* Filters */}
-      <div className="card border-0 shadow-sm rounded-4 mb-4">
-        <div className="card-body p-3 p-md-4">
-          <div className="row g-3">
-            <div className="col-lg-3 col-md-6">
-              <label className="form-label fw-semibold">Search Job</label>
-
-              <input
-                type="text"
-                className="form-control"
-                placeholder="e.g. Java Developer"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-
-            <div className="col-lg-2 col-md-6">
-              <label className="form-label fw-semibold">Location</label>
-
-              <select
-                className="form-select"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              >
-                <option value="">All Locations</option>
-                <option value="Pune">Pune</option>
-                <option value="Mumbai">Mumbai</option>
-                <option value="Bangalore">Bangalore</option>
-                <option value="Remote">Remote</option>
-              </select>
-            </div>
-
-            <div className="col-lg-2 col-md-6">
-              <label className="form-label fw-semibold">Job Type</label>
-
-              <select
-                className="form-select"
-                value={jobType}
-                onChange={(e) => setJobType(e.target.value)}
-              >
-                <option value="">All Job Types</option>
-                <option value="Full Time">Full Time</option>
-                <option value="Part Time">Part Time</option>
-                <option value="Internship">Internship</option>
-                <option value="Contract">Contract</option>
-                <option value="Remote">Remote</option>
-              </select>
-            </div>
-
-            <div className="col-lg-2 col-md-6">
-              <label className="form-label fw-semibold">Experience</label>
-
-              <select
-                className="form-select"
-                value={experience}
-                onChange={(e) => setExperience(e.target.value)}
-              >
-                <option value="">Any Experience</option>
-                <option value="0">Fresher (less than 1 year)</option>
-                <option value="1">1 year</option>
-                <option value="2">2 years</option>
-                <option value="3">3 years</option>
-                <option value="4">4 years</option>
-                <option value="5">5 years</option>
-              </select>
-            </div>
-
-            <div className="col-lg-3 d-flex align-items-end gap-2">
-              <button
-                className="btn btn-primary flex-grow-1"
-                onClick={() =>
-                  fetchJobs({
-                    search,
-                    location,
-                    jobType,
-                    experience,
-                  })
-                }
-              >
-                🔎 Search
-              </button>
-
-              <button
-                className="btn btn-outline-secondary"
-                onClick={clearFilters}
-              >
-                Clear
-              </button>
-            </div>
-          </div>
+      <form className="jl-filters" onSubmit={handleSearch}>
+        <div className="jl-field jl-field-grow">
+          <label htmlFor="jl-search">Search</label>
+          <input
+            id="jl-search"
+            type="text"
+            className="form-control"
+            placeholder="e.g. Java Developer"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
-      </div>
 
-      {/* Selected Resume */}
-      {role === "JOBSEEKER" && resume && (
-        <div className="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-2">
-          <span>
-            📄 Selected Resume: <strong>{resume.name}</strong>
-          </span>
-
-          <button
-            className="btn btn-sm btn-outline-danger"
-            onClick={() => setResume(null)}
+        <div className="jl-field">
+          <label htmlFor="jl-location">Location</label>
+          <select
+            id="jl-location"
+            className="form-select"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
           >
-            Remove
+            <option value="">All locations</option>
+            <option value="Pune">Pune</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Bangalore">Bangalore</option>
+            <option value="Remote">Remote</option>
+          </select>
+        </div>
+
+        <div className="jl-field">
+          <label htmlFor="jl-type">Job type</label>
+          <select
+            id="jl-type"
+            className="form-select"
+            value={jobType}
+            onChange={(e) => setJobType(e.target.value)}
+          >
+            <option value="">All job types</option>
+            <option value="Full Time">Full Time</option>
+            <option value="Part Time">Part Time</option>
+            <option value="Internship">Internship</option>
+            <option value="Contract">Contract</option>
+            <option value="Remote">Remote</option>
+          </select>
+        </div>
+
+        <div className="jl-field">
+          <label htmlFor="jl-exp">Experience</label>
+          <select
+            id="jl-exp"
+            className="form-select"
+            value={experience}
+            onChange={(e) => setExperience(e.target.value)}
+          >
+            <option value="">Any experience</option>
+            <option value="0">Fresher (less than 1 year)</option>
+            <option value="1">1 year</option>
+            <option value="2">2 years</option>
+            <option value="3">3 years</option>
+            <option value="4">4 years</option>
+            <option value="5">5 years</option>
+          </select>
+        </div>
+
+        <div className="jl-filter-actions">
+          <button type="submit" className="jl-btn primary">
+            Search
           </button>
+          <button type="button" className="jl-btn ghost" onClick={clearFilters}>
+            Clear
+          </button>
+        </div>
+      </form>
+
+      {/* Results */}
+      {loading && slow && (
+        <div className="jl-wake">
+          <strong>Server is waking up.</strong> This demo runs on free hosting,
+          so the first load can take up to a minute. Thanks for your patience!
         </div>
       )}
 
-      {/* Loading */}
       {loading ? (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary mb-3"></div>
-          <h5>Loading Jobs...</h5>
+        <div className="jl-grid">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <JobCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : loadError ? (
+        <div className="jl-empty">
+          <h4>Couldn&apos;t load jobs</h4>
+          <p>Please check your connection and try again.</p>
+          <button
+            type="button"
+            className="jl-btn primary"
+            onClick={() => fetchJobs()}
+          >
+            Retry
+          </button>
         </div>
       ) : jobs.length === 0 ? (
-        /* Empty State */
-        <div className="card border-0 shadow-sm rounded-4">
-          <div className="card-body text-center py-5">
-            <div style={{ fontSize: "55px" }}>🔍</div>
-
-            <h4 className="fw-bold mt-3">No Jobs Found</h4>
-
-            <p className="text-muted">
-              Try changing your search or filter options.
-            </p>
-
-            <button className="btn btn-primary" onClick={clearFilters}>
-              Clear Filters
-            </button>
-          </div>
+        <div className="jl-empty">
+          <h4>No jobs found</h4>
+          <p>Try changing your search or filter options.</p>
+          <button
+            type="button"
+            className="jl-btn primary"
+            onClick={clearFilters}
+          >
+            Clear filters
+          </button>
         </div>
       ) : (
         <>
-          {/* Result Count */}
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h5 className="mb-0 fw-bold">
-              {jobs.length} Job{jobs.length !== 1 ? "s" : ""} Found
-            </h5>
-          </div>
+          <p className="jl-count">
+            {jobs.length} job{jobs.length !== 1 ? "s" : ""} found
+          </p>
 
-          {/* Job Cards */}
-          <div className="row g-4">
+          <div className="jl-grid">
             {jobs.map((job) => {
-              const skills = job.skills
-                ? job.skills
-                    .split(",")
-                    .map((skill) => skill.trim())
-                    .filter(Boolean)
-                : [];
-
-              const isApplied = appliedJobs.includes(job.id);
-              const isApplying = applyingJobId === job.id;
-
               // Employer: only own jobs. Admin: every job (delete only).
               const canManage =
                 role === "ADMIN" ||
@@ -466,134 +410,74 @@ function JobList() {
                   job.employerEmail?.toLowerCase() === email?.toLowerCase());
 
               return (
-                <div className="col-xl-4 col-lg-6" key={job.id}>
-                  <div className="card border-0 shadow-sm rounded-4 h-100">
-                    <div className="card-body p-4 d-flex flex-column">
-                      {/* Title */}
-                      <div className="d-flex justify-content-between align-items-start gap-2 mb-3">
-                        <div>
-                          <h4 className="fw-bold mb-1">
-                            {job.title || "Untitled Job"}
-                          </h4>
-
-                          <p className="text-primary fw-semibold mb-0">
-                            🏢 {job.company || "Company Not Available"}
-                          </p>
-                        </div>
-
-                        {getStatusBadge(job.status)}
-                      </div>
-
-                      {/* Job Details */}
-                      <div className="mb-3">
-                        <div className="mb-2">
-                          📍 <strong>Location:</strong>{" "}
-                          {job.location || "Not specified"}
-                        </div>
-
-                        <div className="mb-2">
-                          💰 <strong>Salary:</strong>{" "}
-                          {job.salary
-                            ? `₹ ${Number(job.salary).toLocaleString("en-IN")}`
-                            : "Not specified"}
-                        </div>
-
-                        <div className="mb-2">
-                          🎓 <strong>Experience:</strong>{" "}
-                          {job.experience || "Not specified"}
-                        </div>
-
-                        <div>
-                          💼 <strong>Job Type:</strong>{" "}
-                          {job.jobType || "Not specified"}
-                        </div>
-                      </div>
-
-                      {/* Skills */}
-                      <div className="mb-3">
-                        {skills.length > 0 ? (
-                          <div className="d-flex flex-wrap gap-2">
-                            {skills.map((skill, index) => (
-                              <span
-                                key={index}
-                                className="badge bg-primary-subtle text-primary px-2 py-2"
-                              >
-                                {skill}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-muted small">
-                            No specific skills listed
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-muted flex-grow-1 mb-4">
-                        {job.description
-                          ? job.description
-                          : "No description available."}
-                      </p>
-
-                      {/* Job Seeker Actions */}
-                      {role === "JOBSEEKER" && (
-                        <div className="mt-auto">
-                          {!isApplied && (
-                            <div className="mb-3">
-                              <label className="form-label fw-semibold small">
-                                Resume (PDF, max 5 MB)
-                              </label>
-
-                              <input
-                                type="file"
-                                className="form-control form-control-sm"
-                                accept=".pdf,application/pdf"
-                                onChange={handleResumeChange}
-                              />
-                            </div>
-                          )}
-
-                          {isApplied ? (
-                            <button className="btn btn-success w-100" disabled>
-                              ✓ Applied
-                            </button>
-                          ) : (
-                            <button
-                              className="btn btn-primary w-100"
-                              onClick={() => applyJob(job.id, job.title)}
-                              disabled={isApplying}
-                            >
-                              {isApplying ? "Submitting..." : "Apply Now"}
-                            </button>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Employer/Admin Actions */}
-                      {canManage && (
-                        <div className="d-flex gap-2 mt-auto">
-                          {role === "EMPLOYER" && (
-                            <Link
-                              to={`/employer/edit-job/${job.id}`}
-                              className="btn btn-outline-primary flex-grow-1"
-                            >
-                              ✏️ Edit
-                            </Link>
-                          )}
-                          <button
-                            className="btn btn-outline-danger flex-grow-1"
-                            onClick={() => deleteJob(job.id)}
-                          >
-                            🗑 Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <JobListingCard
+                  key={job.id}
+                  job={job}
+                  role={role}
+                  isApplied={appliedJobs.includes(job.id)}
+                  canManage={canManage}
+                  onApply={openApply}
+                  onDelete={deleteJob}
+                />
               );
             })}
+          </div>
+        </>
+      )}
+
+      {/* Apply modal */}
+      {applyTarget && (
+        <>
+          <div className="modal-backdrop show" onClick={closeApply} />
+          <div
+            className="modal d-block"
+            role="dialog"
+            aria-modal="true"
+            tabIndex="-1"
+            onClick={closeApply}
+          >
+            <div
+              className="modal-dialog modal-dialog-centered"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-content jl-modal">
+                <div className="jl-modal-head">
+                  <h5>Apply for {applyTarget.title}</h5>
+                  <p>{applyTarget.company}</p>
+                </div>
+
+                <label htmlFor="jl-resume" className="form-label">
+                  Resume (PDF, max 5 MB)
+                </label>
+                <input
+                  id="jl-resume"
+                  type="file"
+                  className="form-control"
+                  accept=".pdf,application/pdf"
+                  onChange={handleResumeChange}
+                />
+                {resume && <p className="jl-file">📄 {resume.name}</p>}
+
+                <div className="jl-modal-foot">
+                  <button
+                    type="button"
+                    className="jl-btn ghost"
+                    onClick={closeApply}
+                    disabled={applying}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="jl-btn primary"
+                    onClick={submitApplication}
+                    disabled={!resume || applying}
+                  >
+                    {applying ? "Submitting..." : "Submit application"}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </>
       )}

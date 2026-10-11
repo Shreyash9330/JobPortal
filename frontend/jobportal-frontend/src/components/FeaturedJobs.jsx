@@ -1,103 +1,91 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import JobCard from "./JobCard";
+import JobListingCard, { JobCardSkeleton } from "./JobListingCard";
 import "../styles/featuredjobs.css";
 
 function FeaturedJobs() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [slow, setSlow] = useState(false);
 
   useEffect(() => {
+    const wake = setTimeout(() => setSlow(true), 4000);
+
     const loadJobs = async () => {
       try {
-        setLoading(true);
-        setError(false);
-
         const response = await axios.get("/api/jobs");
-
         // Latest 6 jobs
-        const latestJobs = response.data.slice().reverse().slice(0, 6);
-
-        setJobs(latestJobs);
-      } catch (error) {
-        console.log("Featured Jobs Error:", error);
+        setJobs(response.data.slice().reverse().slice(0, 6));
+      } catch (err) {
+        console.log("Featured Jobs Error:", err);
         setError(true);
       } finally {
+        clearTimeout(wake);
+        setSlow(false);
         setLoading(false);
       }
     };
 
     loadJobs();
+    return () => clearTimeout(wake);
   }, []);
 
   return (
     <section className="featured-section">
       <div className="container">
-        {/* Section Header */}
         <div className="section-title text-center mb-5">
-          <h2>🔥 Featured Jobs</h2>
-
-          <p>Discover the latest opportunities from top companies.</p>
+          <h2>Latest openings</h2>
+          <p>Fresh opportunities from employers on JobPortal.</p>
         </div>
 
-        {/* Loading */}
+        {loading && slow && (
+          <div className="jl-wake">
+            <strong>Server is waking up.</strong> This demo runs on free
+            hosting, so the first load can take up to a minute.
+          </div>
+        )}
+
         {loading && (
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary mb-3"></div>
-
-            <h5 className="text-muted">Loading latest jobs...</h5>
+          <div className="jl-grid">
+            {[0, 1, 2].map((i) => (
+              <JobCardSkeleton key={i} />
+            ))}
           </div>
         )}
 
-        {/* Error */}
         {!loading && error && (
-          <div className="text-center py-5">
-            <div style={{ fontSize: "45px" }}>⚠️</div>
-
-            <h5 className="fw-bold mt-3">Unable to Load Jobs</h5>
-
-            <p className="text-muted">Please try again later.</p>
-
-            <Link to="/jobs" className="btn btn-primary">
-              Browse All Jobs
+          <div className="jl-empty">
+            <h4>Unable to load jobs</h4>
+            <p>Please try again in a moment.</p>
+            <Link to="/jobs" className="jl-btn primary">
+              Browse all jobs
             </Link>
           </div>
         )}
 
-        {/* Empty State */}
         {!loading && !error && jobs.length === 0 && (
-          <div className="text-center py-5">
-            <div style={{ fontSize: "50px" }}>💼</div>
-
-            <h5 className="fw-bold mt-3">No Jobs Available</h5>
-
-            <p className="text-muted">
-              New job opportunities will appear here.
-            </p>
-
-            <Link to="/jobs" className="btn btn-primary">
-              Browse Jobs
+          <div className="jl-empty">
+            <h4>No jobs available yet</h4>
+            <p>New job opportunities will appear here.</p>
+            <Link to="/jobs" className="jl-btn primary">
+              Browse jobs
             </Link>
           </div>
         )}
 
-        {/* Jobs */}
         {!loading && !error && jobs.length > 0 && (
           <>
-            <div className="row g-4">
+            <div className="jl-grid">
               {jobs.map((job) => (
-                <div className="col-xl-4 col-lg-4 col-md-6" key={job.id}>
-                  <JobCard job={job} />
-                </div>
+                <JobListingCard key={job.id} job={job} linkTo="/jobs" />
               ))}
             </div>
 
-            {/* View All */}
             <div className="text-center mt-5">
-              <Link to="/jobs" className="btn btn-outline-primary px-4">
-                View All Jobs →
+              <Link to="/jobs" className="jl-btn ghost">
+                View all jobs →
               </Link>
             </div>
           </>

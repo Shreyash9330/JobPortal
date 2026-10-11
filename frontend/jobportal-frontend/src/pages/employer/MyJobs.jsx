@@ -12,10 +12,6 @@ function MyJobs() {
   const employerEmail = localStorage.getItem("email");
   const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
-
   const fetchJobs = async () => {
     try {
       const response = await axios.get(`/api/jobs/employer/${employerEmail}`, {
@@ -38,6 +34,11 @@ function MyJobs() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchJobs();
+  }, []);
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({

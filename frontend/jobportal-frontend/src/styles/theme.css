@@ -1,0 +1,133 @@
+/* ---------- Buttons ---------- */
+body .btn {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.6rem 1.25rem;
+  transition: all 0.15s;
+}
+body .btn-sm {
+  padding: 0.4rem 0.9rem;
+}
+body .btn-primary {
+  background: var(--jp-primary);
+  border-color: var(--jp-primary);
+  color: #fff;
+}
+body .btn-primary:hover {
+  background: var(--jp-primary-ink);
+  border-color: var(--jp-primary-ink);
+}
+body .btn-outline-primary {
+  color: var(--jp-primary);
+  border-color: var(--jp-primary);
+  background: transparent;
+}
+body .btn-outline-primary:hover {
+  background: var(--jp-primary);
+  border-color: var(--jp-primary);
+  color: #fff;
+}
+body .btn-danger {
+  background: var(--jp-danger);
+  border-color: var(--jp-danger);
+}
+body .btn-secondary {
+  background: var(--jp-navy);
+  border-color: var(--jp-navy);
+}
+body .btn-info {
+  background: var(--jp-accent);
+  border-color: var(--jp-accent);
+  color: #fff;
+}
+
+/* ---------- Cards ---------- */
+body .card {
+  background: var(--jp-surface);
+  border: 1px solid var(--jp-line);
+  border-radius: var(--jp-radius);
+  box-shadow: none;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s,
+    border-color 0.2s;
+}
+body .card:hover {
+  box-shadow: var(--jp-shadow);
+  border-color: #cfd8e6;
+}
+
+/* ---------- Forms ---------- */
+body .form-control,
+body .form-select {
+  border: 1px solid var(--jp-line);
+  border-radius: 12px;
+  padding: 0.65rem 0.9rem;
+  background-color: #fff;
+}
+body .form-control:focus,
+body .form-select:focus {
+  border-color: var(--jp-primary);
+  box-shadow: 0 0 0 4px var(--jp-primary-soft);
+}
+body .form-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--jp-ink);
+}
+
+/* ---------- Typography ---------- */
+body h1,
+body h2,
+body h3,
+body h4,
+body h5 {
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: var(--jp-ink);
+}
+body .text-muted {
+  color: var(--jp-muted) !important;
+}
+body a {
+  color: var(--jp-primary);
+}
+
+/* ---------- Badges (status pills) ---------- */
+body .badge {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.4em 0.8em;
+}
+body .bg-success {
+  background: var(--jp-success-soft) !important;
+  color: var(--jp-success) !important;
+}
+body .bg-warning {
+  background: var(--jp-warning-soft) !important;
+  color: var(--jp-warning) !important;
+}
+body .bg-danger {
+  background: var(--jp-danger-soft) !important;
+  color: var(--jp-danger) !important;
+}
+body .bg-primary {
+  background: var(--jp-primary-soft) !important;
+  color: var(--jp-primary-ink) !important;
+}
+
+/* ---------- Tables ---------- */
+body .table {
+  --bs-table-bg: transparent;
+}
+body .table thead th {
+  background: var(--jp-bg);
+  color: var(--jp-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--jp-line);
+}
+body .table-dark {
+  --bs-table-bg: var(--jp-navy);
+}

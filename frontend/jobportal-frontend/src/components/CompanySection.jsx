@@ -1,62 +1,83 @@
-import "../styles/companySection.css";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import "../styles/home.css";
 
-import googleLogo from "../assets/images/companies/google.svg";
-import microsoftLogo from "../assets/images/companies/microsoft.svg";
-import amazonLogo from "../assets/images/companies/amazon.svg";
-import ibmLogo from "../assets/images/companies/ibm.svg";
-import infosysLogo from "../assets/images/companies/infosys.svg";
-import tcsLogo from "../assets/images/companies/tcs.svg";
-import accentureLogo from "../assets/images/companies/accenture.svg";
-import capgeminiLogo from "../assets/images/companies/capgemini.svg";
-import cognizantLogo from "../assets/images/companies/cognizant.svg";
-import wiproLogo from "../assets/images/companies/wipro.svg";
-
-const companies = [
-  { name: "Google", logo: googleLogo },
-  { name: "Microsoft", logo: microsoftLogo },
-  { name: "Amazon", logo: amazonLogo },
-  { name: "IBM", logo: ibmLogo },
-  { name: "Infosys", logo: infosysLogo },
-  { name: "TCS", logo: tcsLogo },
-  { name: "Accenture", logo: accentureLogo },
-  { name: "Capgemini", logo: capgeminiLogo },
-  { name: "Cognizant", logo: cognizantLogo },
-  { name: "Wipro", logo: wiproLogo },
+const AVATARS = [
+  ["#e8eeff", "#1e3fb8"],
+  ["#ddf7f3", "#0f766e"],
+  ["#fff1d6", "#b45309"],
+  ["#fde8e9", "#b42318"],
+  ["#ede9fe", "#5b21b6"],
 ];
 
 function CompanySection() {
+  const [companies, setCompanies] = useState(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const response = await axios.get("/api/jobs");
+        const counts = {};
+
+        response.data.forEach((job) => {
+          const name = job.company?.trim();
+          if (!name || job.status?.toUpperCase() === "CLOSED") return;
+          counts[name] = (counts[name] || 0) + 1;
+        });
+
+        const list = Object.entries(counts)
+          .map(([name, openRoles]) => ({ name, openRoles }))
+          .sort((a, b) => b.openRoles - a.openRoles)
+          .slice(0, 8);
+
+        setCompanies(list);
+      } catch (error) {
+        console.log("Companies Error:", error);
+        setCompanies([]);
+      }
+    };
+
+    load();
+  }, []);
+
+  if (companies && companies.length === 0) return null;
+
   return (
-    <section className="company-section">
-      <div className="container">
-        <div className="section-title text-center mb-5">
-          <p className="text-primary fw-semibold mb-2">Trusted Companies</p>
-
-          <h2 className="fw-bold mb-2">Companies Hiring on JobPortal</h2>
-
-          <p className="text-muted mb-0">
-            Explore opportunities from leading companies.
-          </p>
+    <section className="hm-section hm-alt">
+      <div className="hm-container">
+        <div className="hm-head">
+          <span className="hm-eyebrow">Employers</span>
+          <h2>Companies hiring now</h2>
+          <p>Employers with open roles on JobPortal right now.</p>
         </div>
 
-        <div className="row g-3 g-md-4 justify-content-center">
-          {companies.map((company) => (
-            <div
-              className="col-xl-2 col-lg-2 col-md-3 col-6"
-              key={company.name}
-            >
-              <div className="company-card h-100">
-                <div className="company-logo-wrapper">
-                  <img
-                    src={company.logo}
-                    alt={`${company.name} logo`}
-                    loading="lazy"
-                  />
-                </div>
-
-                <h6>{company.name}</h6>
-              </div>
-            </div>
-          ))}
+        <div className="hm-company-grid">
+          {companies === null
+            ? [0, 1, 2, 3].map((i) => (
+                <div className="hm-company hm-skel-box" key={i} />
+              ))
+            : companies.map((company) => {
+                const [bg, ink] =
+                  AVATARS[company.name.charCodeAt(0) % AVATARS.length];
+                return (
+                  <Link to="/jobs" className="hm-company" key={company.name}>
+                    <div
+                      className="hm-company-avatar"
+                      style={{ background: bg, color: ink }}
+                    >
+                      {company.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <strong>{company.name}</strong>
+                      <small>
+                        {company.openRoles} open role
+                        {company.openRoles !== 1 ? "s" : ""}
+                      </small>
+                    </div>
+                  </Link>
+                );
+              })}
         </div>
       </div>
     </section>

@@ -5,6 +5,9 @@ import "./styles/index.css";
 
 import App from "./App.jsx";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./styles/tokens.css";
+import "./styles/theme.css";
+import "./styles/sitenav.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

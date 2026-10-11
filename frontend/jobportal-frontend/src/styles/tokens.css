@@ -1,0 +1,29 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  --jp-bg: #f5f7fb;
+  --jp-surface: #ffffff;
+  --jp-ink: #0f172a;
+  --jp-muted: #5b6b82;
+  --jp-line: #e3e8f0;
+
+  --jp-primary: #2f5bea;
+  --jp-primary-ink: #1e3fb8;
+  --jp-primary-soft: #e8eeff;
+  --jp-navy: #0b1220;
+  --jp-accent: #14b8a6;
+  --jp-accent-soft: #ddf7f3;
+
+  --jp-success: #16a34a;  --jp-success-soft: #e3f6ea;
+  --jp-warning: #d97706;  --jp-warning-soft: #fff1d6;
+  --jp-danger: #e5484d;   --jp-danger-soft: #fde8e9;
+
+  --jp-radius: 14px;
+  --jp-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--jp-bg);
+  color: var(--jp-ink);
+}

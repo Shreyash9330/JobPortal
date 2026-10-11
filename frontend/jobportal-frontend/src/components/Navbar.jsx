@@ -1,135 +1,118 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { getAuth, clearAuth } from "../utils/auth";
+import "../styles/sitenav.css";
+import Logo from "./Logo";
+
+const DASHBOARDS = {
+  ADMIN: "/admin",
+  EMPLOYER: "/employer/dashboard",
+  JOBSEEKER: "/jobseeker",
+};
 
 function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
   const auth = getAuth();
   const token = auth?.token;
   const role = auth?.role || "";
+  const dashboard = DASHBOARDS[role];
 
-  const closeMenu = () => {
-    setMenuOpen(false);
-  };
-
-  const goToDashboard = () => {
-    if (role === "ADMIN") {
-      navigate("/admin");
-    } else if (role === "EMPLOYER") {
-      navigate("/employer/dashboard");
-    } else if (role === "JOBSEEKER") {
-      navigate("/jobseeker");
-    }
-    closeMenu();
-  };
-
+  const close = () => setOpen(false);
   const handleLogout = () => {
     clearAuth();
-
-    closeMenu();
+    close();
     navigate("/");
   };
+  const linkClass = ({ isActive }) => "sn-link" + (isActive ? " active" : "");
 
   return (
-    <nav className="navbar navbar-expand-lg bg-white shadow-sm sticky-top py-3">
-      <div className="container">
-        {/* Logo */}
-        <Link
-          className="navbar-brand fw-bold fs-2 text-primary"
-          to="/"
-          onClick={closeMenu}
-        >
-          💼 JobPortal
+    <header className="sn-wrap">
+      <nav className="sn-bar" aria-label="Main">
+        <Link to="/" className="sn-brand" onClick={close}>
+          <Link to="/" className="sn-brand" onClick={close}>
+            <Logo />
+          </Link>
         </Link>
 
-        {/* Mobile Toggle */}
         <button
-          className="navbar-toggler"
           type="button"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-controls="navbarNav"
-          aria-expanded={menuOpen}
+          className="sn-burger"
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}
           aria-label="Toggle navigation"
         >
-          <span className="navbar-toggler-icon"></span>
+          <span />
+          <span />
+          <span />
         </button>
 
-        {/* Navbar */}
-        <div
-          className={`collapse navbar-collapse ${menuOpen ? "show" : ""}`}
-          id="navbarNav"
-        >
-          <ul className="navbar-nav mx-auto gap-lg-3">
-            <li className="nav-item">
-              <Link
-                className="nav-link fw-semibold text-primary"
-                to="/"
-                onClick={closeMenu}
-              >
+        <div className={`sn-menu ${open ? "open" : ""}`}>
+          <ul className="sn-links">
+            <li>
+              <NavLink to="/" end className={linkClass} onClick={close}>
                 Home
-              </Link>
+              </NavLink>
             </li>
-
-            <li className="nav-item">
-              <Link className="nav-link" to="/jobs" onClick={closeMenu}>
+            <li>
+              <NavLink to="/jobs" className={linkClass} onClick={close}>
                 Jobs
-              </Link>
+              </NavLink>
             </li>
-
-            <li className="nav-item">
-              <a className="nav-link" href="/#companies" onClick={closeMenu}>
+            <li>
+              <a className="sn-link" href="/#companies" onClick={close}>
                 Companies
               </a>
             </li>
+            {role === "JOBSEEKER" && (
+              <li>
+                <NavLink
+                  to="/my-applications"
+                  className={linkClass}
+                  onClick={close}
+                >
+                  My Applications
+                </NavLink>
+              </li>
+            )}
           </ul>
 
-          {/* Auth / User Actions */}
-          <div className="d-flex gap-2 mt-3 mt-lg-0">
+          <div className="sn-actions">
             {!token ? (
               <>
-                <Link
-                  className="btn btn-outline-primary px-4"
-                  to="/login"
-                  onClick={closeMenu}
-                >
+                <Link to="/login" className="sn-btn ghost" onClick={close}>
                   Login
                 </Link>
-
                 <Link
-                  className="btn btn-primary rounded-pill px-4"
                   to="/register-choice"
-                  onClick={closeMenu}
+                  className="sn-btn dark"
+                  onClick={close}
                 >
-                  Register
+                  Get started <span aria-hidden="true">→</span>
                 </Link>
               </>
             ) : (
               <>
-                <button className="btn btn-secondary" onClick={goToDashboard}>
-                  Dashboard
-                </button>
-
-                {role === "JOBSEEKER" && (
-                  <Link
-                    className="btn btn-info text-white"
-                    to="/my-applications"
-                    onClick={closeMenu}
-                  >
-                    📄 My Applications
+                {role && <span className="sn-role">{role.toLowerCase()}</span>}
+                {dashboard && (
+                  <Link to={dashboard} className="sn-btn dark" onClick={close}>
+                    Dashboard <span aria-hidden="true">→</span>
                   </Link>
                 )}
-
-                <button className="btn btn-danger" onClick={handleLogout}>
+                <button
+                  type="button"
+                  className="sn-btn ghost"
+                  onClick={handleLogout}
+                >
                   Logout
                 </button>
               </>
             )}
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }
 

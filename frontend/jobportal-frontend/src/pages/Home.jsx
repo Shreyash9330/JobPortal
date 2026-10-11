@@ -2,8 +2,9 @@ import Hero from "../components/Hero";
 import SearchBar from "../components/SearchBar";
 import FeaturedJobs from "../components/FeaturedJobs";
 import CompanySection from "../components/CompanySection";
-import Stats from "../components/Stats";
+import HowItWorks from "../components/HowItWorks";
 import WhyChooseUs from "../components/WhyChooseUs";
+import Stats from "../components/Stats";
 import Footer from "../components/Footer";
 
 function Home() {
@@ -17,8 +18,9 @@ function Home() {
         <CompanySection />
       </section>
 
-      <Stats />
+      <HowItWorks />
       <WhyChooseUs />
+      <Stats />
       <Footer />
     </>
   );
