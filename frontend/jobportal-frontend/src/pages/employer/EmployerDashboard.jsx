@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../../styles/employerDashboard.css";
+import "../../styles/EmployerDashboard.css";
 
 function EmployerDashboard() {
   const navigate = useNavigate();
@@ -24,10 +24,7 @@ function EmployerDashboard() {
           axios.get(`/api/jobs/employer/${email}`, {
             headers,
           }),
-          axios.get(
-            `/api/applications/employer/${email}`,
-            { headers },
-          ),
+          axios.get(`/api/applications/employer/${email}`, { headers }),
         ]);
 
         setJobs(jobsResponse.data);

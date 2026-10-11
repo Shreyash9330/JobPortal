@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import JobCard from "./JobCard";
-import "../styles/featuredJobs.css";
+import "../styles/featuredjobs.css";
 
 function FeaturedJobs() {
   const [jobs, setJobs] = useState([]);

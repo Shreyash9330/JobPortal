@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { deleteJob } from "../../services/jobService";
+import { deleteJob } from "../../services/jobservice";
 import { useNavigate } from "react-router-dom";
 
 function MyJobs() {
@@ -18,14 +18,11 @@ function MyJobs() {
 
   const fetchJobs = async () => {
     try {
-      const response = await axios.get(
-        `/api/jobs/employer/${employerEmail}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.get(`/api/jobs/employer/${employerEmail}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       setJobs(response.data);
     } catch (error) {
