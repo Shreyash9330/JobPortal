@@ -4,7 +4,7 @@ import {
   FaBuilding,
   FaPaperPlane,
 } from "react-icons/fa";
-import "../styles/whyChooseUs.css";
+import "../styles/WhyChooseUs.css";
 
 function WhyChooseUs() {
   const features = [
