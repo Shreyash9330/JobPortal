@@ -58,3 +58,12 @@ WHERE NOT EXISTS (
 -- 4) Quick check
 SELECT email, role FROM user ORDER BY id;
 SELECT id, title, location, job_type, status FROM job ORDER BY id;
+-- numeric salaries (annual, INR) so the UI formats them correctly
+UPDATE job SET salary='500000' WHERE title='Java Backend Developer' AND employer_email='employer@jobportal.com';
+UPDATE job SET salary='650000' WHERE title='React Frontend Developer' AND employer_email='employer@jobportal.com';
+UPDATE job SET salary='180000' WHERE title='Java Full Stack Intern' AND employer_email='employer@jobportal.com';
+UPDATE job SET salary='800000' WHERE title='Software Engineer (Remote)' AND employer_email='employer@jobportal.com';
+UPDATE job SET salary='600000' WHERE title='QA Automation Engineer' AND employer_email='employer@jobportal.com';
+UPDATE job SET salary='550000' WHERE title='Data Analyst' AND employer_email='employer@jobportal.com';
+UPDATE job SET salary='300000' WHERE title='UI/UX Designer' AND employer_email='employer@jobportal.com';
+UPDATE job SET salary='900000' WHERE title='DevOps Engineer' AND employer_email='employer@jobportal.com';
