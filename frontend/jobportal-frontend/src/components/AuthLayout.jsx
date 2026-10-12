@@ -1,4 +1,13 @@
+import { Link } from "react-router-dom";
+import Logo from "./Logo";
 import "../styles/auth.css";
+
+const POINTS = [
+  "Apply in one click with your PDF resume",
+  "Separate dashboards for seekers, employers and admins",
+  "Secure JWT login with OTP password reset",
+  "Track every application in one place",
+];
 
 function AuthLayout({ children }) {
   return (
@@ -6,24 +15,21 @@ function AuthLayout({ children }) {
       <div className="auth-container">
         {/* Left Side */}
         <div className="auth-left">
-          <h1>JobPortal</h1>
+          <Link to="/" className="auth-brand">
+            <Logo light size={38} />
+          </Link>
 
-          <h2>Build Your Career With Confidence</h2>
-
+          <h2>Build your career with confidence</h2>
           <p>
-            Discover thousands of verified jobs, connect with top companies, and
-            apply easily from one platform.
+            Search openings, apply in seconds and keep track of every
+            application.
           </p>
 
-          <div className="auth-features">
-            <div>✔ 500+ Hiring Companies</div>
-
-            <div>✔ 8,000+ Active Jobs</div>
-
-            <div>✔ One Click Apply</div>
-
-            <div>✔ Trusted by Thousands</div>
-          </div>
+          <ul className="auth-features">
+            {POINTS.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ul>
         </div>
 
         {/* Right Side */}

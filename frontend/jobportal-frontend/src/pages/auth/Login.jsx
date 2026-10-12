@@ -11,7 +11,13 @@ import {
   FaEyeSlash,
   FaArrowRight,
 } from "react-icons/fa";
-<Link to="/forgot-password">Forgot Password?</Link>;
+
+const DEMO_PASSWORD = "Demo@1234";
+const DEMO_ACCOUNTS = [
+  { label: "Job Seeker", email: "seeker@jobportal.com" },
+  { label: "Employer", email: "employer@jobportal.com" },
+  { label: "Admin", email: "admin@jobportal.com" },
+];
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -21,6 +27,12 @@ function Login() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  const fillDemo = (account) => {
+    setEmail(account.email);
+    setPassword(DEMO_PASSWORD);
+    setMessage("");
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -69,7 +81,7 @@ function Login() {
   return (
     <AuthLayout>
       <div className="login-form">
-        <h2>Welcome Back 👋</h2>
+        <h2>Welcome back</h2>
 
         <p className="auth-subtitle">Login to continue your career journey.</p>
 
@@ -83,7 +95,7 @@ function Login() {
             <input
               type="email"
               className="form-control"
-              placeholder="Email Address"
+              placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
@@ -91,7 +103,7 @@ function Login() {
           </div>
 
           {/* Password */}
-          <div className="input-group mb-3">
+          <div className="input-group mb-2">
             <span className="input-group-text">
               <FaLock />
             </span>
@@ -115,23 +127,8 @@ function Login() {
             </button>
           </div>
 
-          {/* Remember Me + Forgot Password */}
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <div className="form-check">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="rememberMe"
-              />
-
-              <label className="form-check-label" htmlFor="rememberMe">
-                Remember Me
-              </label>
-            </div>
-
-            <Link to="/forgot-password" className="text-decoration-none">
-              Forgot Password?
-            </Link>
+          <div className="auth-forgot">
+            <Link to="/forgot-password">Forgot password?</Link>
           </div>
 
           {/* Message */}
@@ -154,29 +151,46 @@ function Login() {
             disabled={loading}
           >
             {loading ? (
-              "Signing In..."
+              "Signing in..."
             ) : (
               <>
-                Sign In
+                Sign in
                 <FaArrowRight className="ms-2" />
               </>
             )}
           </button>
         </form>
 
-        {/* Divider */}
-        <div className="text-center my-4">
-          <span className="text-muted">──────── OR ────────</span>
+        {/* Demo accounts */}
+        <div className="demo-box">
+          <div className="demo-title">Try the live demo</div>
+          <div className="demo-chips">
+            {DEMO_ACCOUNTS.map((account) => (
+              <button
+                type="button"
+                className="demo-chip"
+                key={account.email}
+                onClick={() => fillDemo(account)}
+              >
+                {account.label}
+              </button>
+            ))}
+          </div>
+          <small>Click a role to fill the form, then press Sign in.</small>
+        </div>
+
+        <div className="auth-divider">
+          <span>or</span>
         </div>
 
         {/* Register */}
         <div className="text-center">
-          Don't have an account?
+          Don&apos;t have an account?
           <Link
             to="/register-choice"
             className="ms-2 text-decoration-none fw-bold"
           >
-            Create Account
+            Create account
           </Link>
         </div>
       </div>

@@ -21,7 +21,7 @@ function JobList() {
   const [location, setLocation] = useState(
     routerLocation.state?.location || "",
   );
-  const [jobType, setJobType] = useState("");
+  const [jobType, setJobType] = useState(routerLocation.state?.jobType || "");
   const [experience, setExperience] = useState("");
 
   const [loading, setLoading] = useState(true);
