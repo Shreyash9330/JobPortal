@@ -70,13 +70,14 @@ function Login() {
         }
       }, 500);
     } catch (error) {
-      console.log("Login Error:", error);
+  console.log("Login Error:", error);
 
-      setMessage("Invalid Email or Password");
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+    setMessage("Invalid Email or Password");
+  } else {
+    setMessage("Server is waking up or unreachable. Please wait a few seconds and try again.");
+  }
+    };
 
   return (
     <AuthLayout>
