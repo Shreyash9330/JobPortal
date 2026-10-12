@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../../styles/EmployerDashboard.css";
+import {
+  FaBriefcase,
+  FaCheckCircle,
+  FaInbox,
+  FaHourglassHalf,
+  FaPlusCircle,
+  FaClipboardList,
+  FaBuilding,
+  FaArrowRight,
+} from "react-icons/fa";
+import StatusBadge from "../../components/StatusBadge";
+import "../../styles/dashboard.css";
 
 function EmployerDashboard() {
   const navigate = useNavigate();
@@ -16,14 +27,10 @@ function EmployerDashboard() {
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        const headers = {
-          Authorization: `Bearer ${token}`,
-        };
+        const headers = { Authorization: `Bearer ${token}` };
 
         const [jobsResponse, applicationsResponse] = await Promise.all([
-          axios.get(`/api/jobs/employer/${email}`, {
-            headers,
-          }),
+          axios.get(`/api/jobs/employer/${email}`, { headers }),
           axios.get(`/api/applications/employer/${email}`, { headers }),
         ]);
 
@@ -47,135 +54,167 @@ function EmployerDashboard() {
     (job) => job.status && job.status.toUpperCase() === "ACTIVE",
   ).length;
 
+  const pending = applications.filter(
+    (a) => (a.status || "APPLIED").toUpperCase() === "APPLIED",
+  ).length;
+
   const recentJobs = [...jobs].sort((a, b) => b.id - a.id).slice(0, 5);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("email");
-    localStorage.removeItem("role");
+  const stats = [
+    {
+      icon: <FaBriefcase />,
+      tone: "blue",
+      value: jobs.length,
+      label: "Total jobs",
+    },
+    {
+      icon: <FaCheckCircle />,
+      tone: "green",
+      value: activeJobs,
+      label: "Active jobs",
+    },
+    {
+      icon: <FaInbox />,
+      tone: "teal",
+      value: applications.length,
+      label: "Applications",
+    },
+    {
+      icon: <FaHourglassHalf />,
+      tone: "amber",
+      value: pending,
+      label: "Pending review",
+    },
+  ];
 
-    navigate("/");
-  };
+  const actions = [
+    {
+      to: "/employer/add-job",
+      icon: <FaPlusCircle />,
+      tone: "blue",
+      title: "Post a new job",
+      text: "Create an opening in a minute.",
+    },
+    {
+      to: "/employer/my-jobs",
+      icon: <FaClipboardList />,
+      tone: "teal",
+      title: "My jobs",
+      text: "Edit or remove your listings.",
+    },
+    {
+      to: "/employer/applications",
+      icon: <FaInbox />,
+      tone: "amber",
+      title: "Applications",
+      text: "Review candidates and resumes.",
+    },
+    {
+      to: "/employer/profile",
+      icon: <FaBuilding />,
+      tone: "green",
+      title: "Company profile",
+      text: "Keep your company details fresh.",
+    },
+  ];
 
   if (loading) {
     return (
-      <div className="dashboard-container text-center py-5">
-        <div className="spinner-border text-primary mb-3"></div>
-        <h5>Loading Dashboard...</h5>
+      <div className="db-page">
+        <div className="db-loading">
+          <div className="spinner-border text-primary" />
+          <span>Loading your dashboard...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="dashboard-container">
-      {/* Header */}
-      <div className="dashboard-header">
+    <div className="db-page">
+      <div className="db-head">
         <div>
-          <h2>🏢 Employer Dashboard</h2>
+          <div className="db-eyebrow">Employer</div>
+          <h1>Employer dashboard</h1>
           <p>
-            Welcome back, <strong>{email}</strong> 👋
+            Signed in as <strong>{email}</strong>
           </p>
         </div>
 
-        <button className="logout-btn" onClick={logout}>
-          Logout
-        </button>
-      </div>
-
-      {/* Statistics */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>{jobs.length}</h3>
-          <p>Total Jobs</p>
-        </div>
-
-        <div className="stat-card">
-          <h3>{activeJobs}</h3>
-          <p>Active Jobs</p>
-        </div>
-
-        <div className="stat-card">
-          <h3>{applications.length}</h3>
-          <p>Applications</p>
-        </div>
-
-        <div className="stat-card">
-          <h3>N/A</h3>
-          <p>Company Rating</p>
+        <div className="db-head-actions">
+          <Link to="/employer/add-job" className="btn btn-primary">
+            <FaPlusCircle className="me-2" />
+            Post a job
+          </Link>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <h3 className="section-title">Quick Actions</h3>
-
-      <div className="action-grid">
-        <Link to="/employer/add-job" className="action-card">
-          ➕ Post New Job
-        </Link>
-
-        <Link to="/employer/my-jobs" className="action-card">
-          📋 My Jobs
-        </Link>
-
-        <Link to="/employer/applications" className="action-card">
-          📄 Applications
-        </Link>
-
-        <Link to="/employer/profile" className="action-card">
-          🏢 Company Profile
-        </Link>
+      <div className="db-stats">
+        {stats.map((s) => (
+          <div className="db-stat" key={s.label}>
+            <span className={`db-ico ${s.tone}`}>{s.icon}</span>
+            <div>
+              <strong>{s.value}</strong>
+              <span>{s.label}</span>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Recent Jobs */}
-      <div className="dashboard-section">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3 className="mb-0">Recent Jobs</h3>
+      <h3 className="db-title">Quick actions</h3>
+      <div className="db-actions">
+        {actions.map((a) => (
+          <Link to={a.to} className="db-action" key={a.to}>
+            <span className={`db-ico ${a.tone}`}>{a.icon}</span>
+            <div>
+              <h4>{a.title}</h4>
+              <p>{a.text}</p>
+            </div>
+            <FaArrowRight className="db-go" />
+          </Link>
+        ))}
+      </div>
 
+      <div className="db-card">
+        <div className="db-card-head">
+          <h3>Recent jobs</h3>
           <Link
             to="/employer/my-jobs"
             className="btn btn-outline-primary btn-sm"
           >
-            View All
+            View all
           </Link>
         </div>
 
         {recentJobs.length === 0 ? (
-          <div className="text-center py-4">
-            <h5>No Jobs Posted Yet</h5>
-            <p className="text-muted">Start by posting your first job.</p>
-
+          <div className="db-empty">
+            <span className="db-ico blue">
+              <FaBriefcase />
+            </span>
+            <h5>No jobs posted yet</h5>
+            <p>Start by posting your first job.</p>
             <Link to="/employer/add-job" className="btn btn-primary">
-              Post New Job
+              Post a job
             </Link>
           </div>
         ) : (
           <div className="table-responsive">
-            <table className="dashboard-table">
+            <table className="db-table">
               <thead>
                 <tr>
-                  <th>Job Title</th>
+                  <th>Job title</th>
                   <th>Location</th>
-                  <th>Job Type</th>
+                  <th>Type</th>
                   <th>Status</th>
                 </tr>
               </thead>
-
               <tbody>
                 {recentJobs.map((job) => (
                   <tr key={job.id}>
-                    <td>{job.title}</td>
+                    <td className="db-cell-title">{job.title}</td>
                     <td>{job.location || "Not specified"}</td>
                     <td>{job.jobType || "Not specified"}</td>
                     <td>
-                      <span
-                        className={
-                          job.status?.toUpperCase() === "ACTIVE"
-                            ? "badge bg-success"
-                            : "badge bg-secondary"
-                        }
-                      >
-                        {job.status || "Open"}
-                      </span>
+                      <StatusBadge status={job.status} fallback="OPEN" />
                     </td>
                   </tr>
                 ))}

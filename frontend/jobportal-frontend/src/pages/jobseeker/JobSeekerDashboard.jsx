@@ -1,8 +1,17 @@
 import { API_URL } from "../../config";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import Swal from "sweetalert2";
+import {
+  FaFileAlt,
+  FaHourglassHalf,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaSearch,
+  FaArrowRight,
+} from "react-icons/fa";
+import StatusBadge from "../../components/StatusBadge";
+import "../../styles/dashboard.css";
 
 function JobSeekerDashboard() {
   const navigate = useNavigate();
@@ -21,14 +30,9 @@ function JobSeekerDashboard() {
           return;
         }
 
-        const response = await axios.get(
-          `/api/applications/user/${email}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        const response = await axios.get(`/api/applications/user/${email}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         setApplications(response.data);
       } catch (error) {
@@ -41,224 +45,144 @@ function JobSeekerDashboard() {
     loadApplications();
   }, [email, token, navigate]);
 
-  const appliedCount = applications.filter(
-    (app) => app.status?.toUpperCase() === "APPLIED",
-  ).length;
+  const countBy = (s) =>
+    applications.filter((a) => (a.status || "APPLIED").toUpperCase() === s)
+      .length;
 
-  const approvedCount = applications.filter(
-    (app) => app.status?.toUpperCase() === "APPROVED",
-  ).length;
+  const recent = [...applications].sort((a, b) => b.id - a.id).slice(0, 5);
+  const name = email ? email.split("@")[0] : "there";
 
-  const rejectedCount = applications.filter(
-    (app) => app.status?.toUpperCase() === "REJECTED",
-  ).length;
-
-  const recentApplications = [...applications]
-    .sort((a, b) => b.id - a.id)
-    .slice(0, 5);
-
-  const getStatusBadge = (status) => {
-    const currentStatus = status?.toUpperCase() || "APPLIED";
-
-    if (currentStatus === "APPROVED") {
-      return <span className="badge bg-success">APPROVED</span>;
-    }
-
-    if (currentStatus === "REJECTED") {
-      return <span className="badge bg-danger">REJECTED</span>;
-    }
-
-    return <span className="badge bg-warning text-dark">APPLIED</span>;
-  };
-
-  const handleLogout = async () => {
-    const result = await Swal.fire({
-      title: "Logout?",
-      text: "Do you want to logout from your account?",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#dc3545",
-      cancelButtonColor: "#6c757d",
-      confirmButtonText: "Yes, Logout",
-      cancelButtonText: "Cancel",
-    });
-
-    if (!result.isConfirmed) return;
-
-    localStorage.removeItem("token");
-    localStorage.removeItem("email");
-    localStorage.removeItem("role");
-
-    navigate("/login");
-  };
+  const stats = [
+    {
+      icon: <FaFileAlt />,
+      tone: "blue",
+      value: applications.length,
+      label: "Total applications",
+    },
+    {
+      icon: <FaHourglassHalf />,
+      tone: "amber",
+      value: countBy("APPLIED"),
+      label: "Under review",
+    },
+    {
+      icon: <FaCheckCircle />,
+      tone: "green",
+      value: countBy("APPROVED"),
+      label: "Approved",
+    },
+    {
+      icon: <FaTimesCircle />,
+      tone: "red",
+      value: countBy("REJECTED"),
+      label: "Rejected",
+    },
+  ];
 
   if (loading) {
     return (
-      <div className="container py-5">
-        <div className="text-center">
-          <div className="spinner-border text-primary mb-3"></div>
-          <h5>Loading Dashboard...</h5>
+      <div className="db-page">
+        <div className="db-loading">
+          <div className="spinner-border text-primary" />
+          <span>Loading your dashboard...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container-fluid py-4 px-3 px-md-5">
-      {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div className="db-page">
+      <div className="db-head">
         <div>
-          <h2 className="fw-bold mb-1">👨‍💻 Job Seeker Dashboard</h2>
-
-          <p className="text-muted mb-0">
-            Welcome back, <strong>{email}</strong> 👋
-          </p>
+          <div className="db-eyebrow">Job seeker</div>
+          <h1>Welcome back, {name}</h1>
+          <p>Track your applications and find your next role.</p>
         </div>
 
-        <button className="btn btn-danger" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
-
-      {/* Statistics */}
-      <div className="row g-4 mb-5">
-        <div className="col-md-3">
-          <div className="card border-0 shadow-sm rounded-4 text-center h-100">
-            <div className="card-body py-4">
-              <h2 className="fw-bold text-primary">{applications.length}</h2>
-              <p className="text-muted mb-0">Total Applications</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-3">
-          <div className="card border-0 shadow-sm rounded-4 text-center h-100">
-            <div className="card-body py-4">
-              <h2 className="fw-bold text-warning">{appliedCount}</h2>
-              <p className="text-muted mb-0">Applied</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-3">
-          <div className="card border-0 shadow-sm rounded-4 text-center h-100">
-            <div className="card-body py-4">
-              <h2 className="fw-bold text-success">{approvedCount}</h2>
-              <p className="text-muted mb-0">Approved</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-3">
-          <div className="card border-0 shadow-sm rounded-4 text-center h-100">
-            <div className="card-body py-4">
-              <h2 className="fw-bold text-danger">{rejectedCount}</h2>
-              <p className="text-muted mb-0">Rejected</p>
-            </div>
-          </div>
+        <div className="db-head-actions">
+          <Link to="/jobs" className="btn btn-primary">
+            <FaSearch className="me-2" />
+            Browse jobs
+          </Link>
+          <Link to="/my-applications" className="btn btn-outline-primary">
+            My applications
+          </Link>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="mb-4">
-        <h3 className="fw-bold mb-4 text-center">Quick Actions</h3>
-
-        <div className="row g-4">
-          <div className="col-md-6">
-            <button
-              className="btn btn-primary w-100 py-3 rounded-4 shadow-sm"
-              onClick={() => navigate("/jobs")}
-            >
-              🔎 Browse Jobs
-            </button>
+      <div className="db-stats">
+        {stats.map((s) => (
+          <div className="db-stat" key={s.label}>
+            <span className={`db-ico ${s.tone}`}>{s.icon}</span>
+            <div>
+              <strong>{s.value}</strong>
+              <span>{s.label}</span>
+            </div>
           </div>
-
-          <div className="col-md-6">
-            <button
-              className="btn btn-outline-primary w-100 py-3 rounded-4 shadow-sm"
-              onClick={() => navigate("/my-applications")}
-            >
-              📄 My Applications
-            </button>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Recent Applications */}
-      <div className="card border-0 shadow-sm rounded-4 mt-5">
-        <div className="card-body p-4">
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h3 className="fw-bold mb-0">Recent Applications</h3>
+      <div className="db-card">
+        <div className="db-card-head">
+          <h3>Recent applications</h3>
+          <Link
+            to="/my-applications"
+            className="btn btn-outline-primary btn-sm"
+          >
+            View all
+          </Link>
+        </div>
 
-            <button
-              className="btn btn-outline-primary btn-sm"
-              onClick={() => navigate("/my-applications")}
-            >
-              View All
-            </button>
+        {recent.length === 0 ? (
+          <div className="db-empty">
+            <span className="db-ico blue">
+              <FaFileAlt />
+            </span>
+            <h5>No applications yet</h5>
+            <p>Apply to a job and it will show up here.</p>
+            <Link to="/jobs" className="btn btn-primary">
+              Browse jobs <FaArrowRight className="ms-2" />
+            </Link>
           </div>
-
-          {recentApplications.length === 0 ? (
-            <div className="text-center py-5">
-              <div style={{ fontSize: "50px" }}>📄</div>
-
-              <h5 className="fw-bold mt-3">No Applications Yet</h5>
-
-              <p className="text-muted">
-                Start applying for jobs to track your applications here.
-              </p>
-
-              <button
-                className="btn btn-primary"
-                onClick={() => navigate("/jobs")}
-              >
-                Browse Jobs
-              </button>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-dark">
-                  <tr>
-                    <th>Job Title</th>
-                    <th>Applicant</th>
-                    <th>Status</th>
-                    <th>Resume</th>
+        ) : (
+          <div className="table-responsive">
+            <table className="db-table">
+              <thead>
+                <tr>
+                  <th>Job</th>
+                  <th>Status</th>
+                  <th>Resume</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recent.map((app) => (
+                  <tr key={app.id}>
+                    <td className="db-cell-title">
+                      {app.jobTitle || "Job title not available"}
+                    </td>
+                    <td>
+                      <StatusBadge status={app.status} />
+                    </td>
+                    <td>
+                      {app.resumePath ? (
+                        <a
+                          href={`${API_URL}/api/applications/resume/${app.resumePath}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-sm btn-outline-primary"
+                        >
+                          View resume
+                        </a>
+                      ) : (
+                        <span className="db-cell-sub">Not available</span>
+                      )}
+                    </td>
                   </tr>
-                </thead>
-
-                <tbody>
-                  {recentApplications.map((app) => (
-                    <tr key={app.id}>
-                      <td className="fw-semibold">
-                        {app.jobTitle || "Job Title Not Available"}
-                      </td>
-
-                      <td>{app.userEmail || email}</td>
-
-                      <td>{getStatusBadge(app.status)}</td>
-
-                      <td>
-                        {app.resumePath ? (
-                          <a
-                            href={`${API_URL}/api/applications/resume/${app.resumePath}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="btn btn-sm btn-primary"
-                          >
-                            View Resume
-                          </a>
-                        ) : (
-                          <span className="text-muted">Not Available</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

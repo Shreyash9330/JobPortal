@@ -1,171 +1,179 @@
 import { API_URL } from "../../config";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
-import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+import { FaFileAlt, FaSearch } from "react-icons/fa";
+import StatusBadge from "../../components/StatusBadge";
+import "../../styles/dashboard.css";
+
+const FILTERS = ["ALL", "APPLIED", "APPROVED", "REJECTED"];
 
 function MyApplications() {
-  const navigate = useNavigate();
-
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [filter, setFilter] = useState("ALL");
+  const [reloadKey, setReloadKey] = useState(0);
 
   const email = localStorage.getItem("email");
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    loadApplications();
-  }, []);
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError(false);
 
-  const loadApplications = async () => {
-    try {
-      const response = await axios.get(
-        `/api/applications/user/${email}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+        const response = await axios.get(`/api/applications/user/${email}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      setApplications(response.data);
-    } catch (error) {
-      console.log("Applications Error:", error);
+        setApplications(response.data);
+      } catch (err) {
+        console.log("Applications Error:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      Swal.fire({
-        icon: "error",
-        title: "Unable to Load Applications",
-        text: "Something went wrong while loading your applications.",
-        confirmButtonColor: "#dc3545",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    load();
+  }, [email, token, reloadKey]);
 
-  const getBadge = (status) => {
-    const currentStatus = status?.toUpperCase() || "APPLIED";
+  const statusOf = (a) => (a.status || "APPLIED").toUpperCase();
 
-    if (currentStatus === "APPROVED") {
-      return <span className="badge bg-success px-3 py-2">APPROVED</span>;
-    }
+  const visible = [...applications]
+    .sort((a, b) => b.id - a.id)
+    .filter((a) => filter === "ALL" || statusOf(a) === filter);
 
-    if (currentStatus === "REJECTED") {
-      return <span className="badge bg-danger px-3 py-2">REJECTED</span>;
-    }
-
-    return (
-      <span className="badge bg-warning text-dark px-3 py-2">APPLIED</span>
-    );
-  };
+  const countFor = (f) =>
+    f === "ALL"
+      ? applications.length
+      : applications.filter((a) => statusOf(a) === f).length;
 
   if (loading) {
     return (
-      <div className="container py-5">
-        <div className="text-center">
-          <div className="spinner-border text-primary mb-3"></div>
-          <h5>Loading Applications...</h5>
+      <div className="db-page">
+        <div className="db-loading">
+          <div className="spinner-border text-primary" />
+          <span>Loading applications...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container py-5">
-      {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div className="db-page">
+      <div className="db-head">
         <div>
-          <h2 className="fw-bold mb-1">📄 My Applications</h2>
-
-          <p className="text-muted mb-0">
-            Track the status of your job applications.
-          </p>
+          <div className="db-eyebrow">Job seeker</div>
+          <h1>My applications</h1>
+          <p>Track the status of every job you applied to.</p>
         </div>
 
-        <div className="d-flex gap-2">
-          <button
-            className="btn btn-outline-primary"
-            onClick={() => navigate("/jobs")}
-          >
-            🔎 Browse Jobs
-          </button>
-
-          <button
-            className="btn btn-secondary"
-            onClick={() => navigate("/jobseeker")}
-          >
+        <div className="db-head-actions">
+          <Link to="/jobs" className="btn btn-primary">
+            <FaSearch className="me-2" />
+            Browse jobs
+          </Link>
+          <Link to="/jobseeker" className="btn btn-outline-primary">
             Dashboard
-          </button>
+          </Link>
         </div>
       </div>
 
-      {/* Empty State */}
-      {applications.length === 0 ? (
-        <div className="card border-0 shadow-sm rounded-4">
-          <div className="card-body text-center py-5">
-            <div style={{ fontSize: "50px" }}>📄</div>
-
-            <h4 className="fw-bold mt-3">No Applications Found</h4>
-
-            <p className="text-muted">You haven't applied for any jobs yet.</p>
-
+      <div className="db-card">
+        {error ? (
+          <div className="db-empty">
+            <span className="db-ico red">
+              <FaFileAlt />
+            </span>
+            <h5>Couldn&apos;t load your applications</h5>
+            <p>The server may be waking up. Please try again.</p>
             <button
               className="btn btn-primary"
-              onClick={() => navigate("/jobs")}
+              onClick={() => setReloadKey((k) => k + 1)}
             >
-              Browse Jobs
+              Retry
             </button>
           </div>
-        </div>
-      ) : (
-        <div className="card border-0 shadow-sm rounded-4">
-          <div className="card-body p-0">
+        ) : applications.length === 0 ? (
+          <div className="db-empty">
+            <span className="db-ico blue">
+              <FaFileAlt />
+            </span>
+            <h5>No applications found</h5>
+            <p>You haven&apos;t applied for any jobs yet.</p>
+            <Link to="/jobs" className="btn btn-primary">
+              Browse jobs
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="db-tabs">
+              {FILTERS.map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  className={`db-tab ${filter === f ? "active" : ""}`}
+                  onClick={() => setFilter(f)}
+                >
+                  {f === "ALL" ? "All" : f[0] + f.slice(1).toLowerCase()} (
+                  {countFor(f)})
+                </button>
+              ))}
+            </div>
+
             <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-dark">
+              <table className="db-table">
+                <thead>
                   <tr>
-                    <th className="px-3 py-3">ID</th>
-                    <th>Job Title</th>
+                    <th>#</th>
+                    <th>Job</th>
                     <th>Status</th>
                     <th>Resume</th>
                   </tr>
                 </thead>
-
                 <tbody>
-                  {applications.map((app) => (
+                  {visible.map((app) => (
                     <tr key={app.id}>
-                      <td className="px-3">{app.id}</td>
-
-                      <td>
-                        <span className="fw-semibold">
-                          {app.jobTitle || "Job Title Not Available"}
-                        </span>
+                      <td className="db-cell-sub">{app.id}</td>
+                      <td className="db-cell-title">
+                        {app.jobTitle || "Job title not available"}
                       </td>
-
-                      <td>{getBadge(app.status)}</td>
-
+                      <td>
+                        <StatusBadge status={app.status} />
+                      </td>
                       <td>
                         {app.resumePath ? (
                           <a
                             href={`${API_URL}/api/applications/resume/${app.resumePath}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="btn btn-primary btn-sm"
+                            className="btn btn-sm btn-outline-primary"
                           >
-                            📄 View Resume
+                            View resume
                           </a>
                         ) : (
-                          <span className="text-muted">Not Available</span>
+                          <span className="db-cell-sub">Not available</span>
                         )}
                       </td>
                     </tr>
                   ))}
+
+                  {visible.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="text-center db-cell-sub py-4">
+                        No applications in this filter.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
