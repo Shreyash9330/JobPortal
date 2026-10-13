@@ -4,6 +4,8 @@ frontend/dist/
 frontend/.env
 frontend/.env.*
 !frontend/.env.example
+frontend/jobportal-frontend/node_modules/
+frontend/jobportal-frontend/dist/
 
 # Backend
 backend/target/
@@ -11,9 +13,6 @@ backend/uploads/
 backend/.env
 backend/.env.*
 !backend/.env.example
-
-# Sensitive application config
-Select-String -Path backend\src\main\resources\application.properties -Pattern "password|secret|url"
 
 # IDE files
 .vscode/

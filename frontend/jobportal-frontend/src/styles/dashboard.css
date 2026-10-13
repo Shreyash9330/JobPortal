@@ -353,3 +353,6 @@
   .db-form-actions .btn { width: 100%; }
   .db-search { max-width: none; }
 }
+
+/* theme.css sets padding on `body .form-control`, so match its specificity */
+body .db-search .form-control { padding-left: 42px; }

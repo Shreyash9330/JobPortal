@@ -33,6 +33,7 @@ import com.shreyash.jobportal.security.SecurityConfig;
 import com.shreyash.jobportal.service.ApplicationService;
 import com.shreyash.jobportal.service.EmployerRegistrationService;
 import com.shreyash.jobportal.service.JobService;
+import com.shreyash.jobportal.service.ResumeStorageService;
 import com.shreyash.jobportal.service.UserService;
 
 @WebMvcTest(controllers = { AuthController.class, JobController.class, ApplicationController.class })
@@ -41,8 +42,7 @@ import com.shreyash.jobportal.service.UserService;
         GlobalExceptionHandler.class, SecurityConfig.class, JwtUtil.class })
 @TestPropertySource(properties = {
         "app.jwt.secret=test-secret-key-test-secret-key-123456",
-        "app.jwt.expiration-ms=3600000",
-        "app.upload-dir=target/test-uploads"
+        "app.jwt.expiration-ms=3600000"
 })
 class SecurityRulesTest {
 
@@ -66,6 +66,9 @@ class SecurityRulesTest {
 
     @MockitoBean
     private ApplicationService applicationService;
+
+    @MockitoBean
+    private ResumeStorageService resumeStorageService;
 
     private String bearer(String email, Role role) {
         return "Bearer " + jwtUtil.generateToken(email, role);

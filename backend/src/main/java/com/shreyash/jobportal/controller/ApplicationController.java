@@ -1,16 +1,8 @@
 package com.shreyash.jobportal.controller;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -30,6 +22,7 @@ import com.shreyash.jobportal.exception.ResourceNotFoundException;
 import com.shreyash.jobportal.security.AccessGuard;
 import com.shreyash.jobportal.service.ApplicationService;
 import com.shreyash.jobportal.service.JobService;
+import com.shreyash.jobportal.service.ResumeStorageService;
 
 @RestController
 @RequestMapping("/api/applications")
@@ -41,8 +34,8 @@ public class ApplicationController {
     @Autowired
     private JobService jobService;
     
-    @Value("${app.upload-dir}")
-    private String uploadDir;
+    @Autowired
+    private ResumeStorageService resumeStorageService;
     
     @GetMapping("/employer/{email}")
     public List<Application> getApplicationsByEmployer(@PathVariable String email, Authentication auth) {
@@ -58,23 +51,17 @@ public class ApplicationController {
 
     
     @GetMapping("/resume/{fileName}")
-    public ResponseEntity<Resource> viewResume(@PathVariable String fileName) throws Exception {
+    public ResponseEntity<byte[]> viewResume(@PathVariable String fileName) {
 
-        Path baseDir = Paths.get(uploadDir).toAbsolutePath().normalize();
-        Path filePath = baseDir.resolve(fileName).normalize();
-
-        if (!filePath.startsWith(baseDir) || !Files.exists(filePath)) {
-            throw new ResourceNotFoundException("Resume not found");
-        }
-
-        Resource resource = new UrlResource(filePath.toUri());
+        byte[] data = resumeStorageService.load(fileName)
+                .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
 
         return ResponseEntity.ok()
                 .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
-                .body(resource);
+                .body(data);
     }
-    
+
     @PostMapping
     public Application applyJob(@RequestBody Application application, Authentication auth) {
         application.setUserEmail(auth.getName());
@@ -109,22 +96,9 @@ public class ApplicationController {
     
     @PostMapping("/upload")
     public String uploadResume(@RequestParam("file") MultipartFile file) throws Exception {
-
-        String original = file.getOriginalFilename();
-        if (file.isEmpty() || original == null || !original.toLowerCase().endsWith(".pdf")) {
-            throw new IllegalArgumentException("Only PDF files are allowed");
-        }
-
-        Path baseDir = Paths.get(uploadDir).toAbsolutePath().normalize();
-        Files.createDirectories(baseDir);
-
-        String savedName = UUID.randomUUID() + ".pdf";
-        Files.copy(file.getInputStream(), baseDir.resolve(savedName),
-                StandardCopyOption.REPLACE_EXISTING);
-
-        return savedName;
+        return resumeStorageService.save(file);
     }
-    
+
     @GetMapping("/check")
     public boolean hasApplied(@RequestParam Long jobId, @RequestParam String email, Authentication auth) {
         AccessGuard.requireSelfOrAdmin(auth, email);
