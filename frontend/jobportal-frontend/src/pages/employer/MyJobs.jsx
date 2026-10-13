@@ -1,44 +1,50 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
+import {
+  FaBriefcase,
+  FaPlusCircle,
+  FaEye,
+  FaPen,
+  FaTrashAlt,
+} from "react-icons/fa";
 import { deleteJob } from "../../services/jobservice";
-import { useNavigate } from "react-router-dom";
+import { formatSalary } from "../../components/JobListingCard";
+import StatusBadge from "../../components/StatusBadge";
+import "../../styles/dashboard.css";
 
 function MyJobs() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const navigate = useNavigate();
   const employerEmail = localStorage.getItem("email");
   const token = localStorage.getItem("token");
 
-  const fetchJobs = async () => {
-    try {
-      const response = await axios.get(`/api/jobs/employer/${employerEmail}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setJobs(response.data);
-    } catch (error) {
-      console.log("Fetch Jobs Error:", error);
-
-      Swal.fire({
-        icon: "error",
-        title: "Unable to Load Jobs",
-        text: "Something went wrong while loading your jobs.",
-        confirmButtonColor: "#dc3545",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
+        setError(false);
+
+        const response = await axios.get(
+          `/api/jobs/employer/${employerEmail}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+
+        setJobs(response.data);
+      } catch (err) {
+        console.log("Fetch Jobs Error:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchJobs();
-  }, []);
+  }, [employerEmail, token, reloadKey]);
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -57,7 +63,7 @@ function MyJobs() {
     try {
       await deleteJob(id, token);
 
-      setJobs((prevJobs) => prevJobs.filter((job) => job.id !== id));
+      setJobs((prev) => prev.filter((job) => job.id !== id));
 
       Swal.fire({
         icon: "success",
@@ -66,8 +72,8 @@ function MyJobs() {
         timer: 1500,
         showConfirmButton: false,
       });
-    } catch (error) {
-      console.log("Delete Job Error:", error);
+    } catch (err) {
+      console.log("Delete Job Error:", err);
 
       Swal.fire({
         icon: "error",
@@ -78,141 +84,122 @@ function MyJobs() {
     }
   };
 
-  const getStatusBadge = (status) => {
-    const currentStatus = status?.toUpperCase() || "ACTIVE";
-
-    if (currentStatus === "ACTIVE") {
-      return <span className="badge bg-success">ACTIVE</span>;
-    }
-
-    if (currentStatus === "CLOSED") {
-      return <span className="badge bg-danger">CLOSED</span>;
-    }
-
-    return <span className="badge bg-secondary">{currentStatus}</span>;
-  };
-
   if (loading) {
     return (
-      <div className="container py-5">
-        <div className="text-center">
-          <div className="spinner-border text-primary mb-3"></div>
-          <h5>Loading Your Jobs...</h5>
+      <div className="db-page">
+        <div className="db-loading">
+          <div className="spinner-border text-primary" />
+          <span>Loading your jobs...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container py-5">
-      {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div className="db-page">
+      <div className="db-head">
         <div>
-          <h2 className="fw-bold mb-1">📋 My Jobs</h2>
-          <p className="text-muted mb-0">
-            Manage the jobs posted by your company.
-          </p>
+          <div className="db-eyebrow">Employer</div>
+          <h1>My jobs</h1>
+          <p>Manage the jobs posted by your company.</p>
         </div>
 
-        <button
-          className="btn btn-primary"
-          onClick={() => navigate("/employer/add-job")}
-        >
-          ➕ Post New Job
-        </button>
+        <div className="db-head-actions">
+          <Link to="/employer/dashboard" className="btn btn-outline-primary">
+            Dashboard
+          </Link>
+          <Link to="/employer/add-job" className="btn btn-primary">
+            <FaPlusCircle className="me-2" />
+            Post a job
+          </Link>
+        </div>
       </div>
 
-      {/* Empty State */}
-      {jobs.length === 0 ? (
-        <div className="card border-0 shadow-sm rounded-4">
-          <div className="card-body text-center py-5">
-            <div style={{ fontSize: "50px" }}>💼</div>
-
-            <h4 className="fw-bold mt-3">No Jobs Posted Yet</h4>
-
-            <p className="text-muted">
-              Start posting jobs to find the right candidates.
-            </p>
-
+      <div className="db-card">
+        {error ? (
+          <div className="db-empty">
+            <span className="db-ico red">
+              <FaBriefcase />
+            </span>
+            <h5>Couldn&apos;t load your jobs</h5>
+            <p>The server may be waking up. Please try again.</p>
             <button
-              className="btn btn-primary mt-2"
-              onClick={() => navigate("/employer/add-job")}
+              className="btn btn-primary"
+              onClick={() => setReloadKey((k) => k + 1)}
             >
-              Post Your First Job
+              Retry
             </button>
           </div>
-        </div>
-      ) : (
-        <div className="card border-0 shadow-sm rounded-4">
-          <div className="card-body p-0">
-            <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-dark">
-                  <tr>
-                    <th className="px-3 py-3">Job Title</th>
-                    <th>Company</th>
-                    <th>Location</th>
-                    <th>Salary</th>
-                    <th>Status</th>
-                    <th className="text-center">Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {jobs.map((job) => (
-                    <tr key={job.id}>
-                      <td className="px-3">
-                        <div className="fw-semibold">
-                          {job.title || "Untitled Job"}
-                        </div>
-                      </td>
-
-                      <td>{job.company || "Not specified"}</td>
-
-                      <td>📍 {job.location || "Not specified"}</td>
-
-                      <td>
-                        ₹ {Number(job.salary || 0).toLocaleString("en-IN")}
-                      </td>
-
-                      <td>{getStatusBadge(job.status)}</td>
-
-                      <td>
-                        <div className="d-flex justify-content-center gap-2 flex-wrap">
-                          <button
-                            className="btn btn-info btn-sm text-white"
-                            onClick={() =>
-                              navigate(`/employer/view-job/${job.id}`)
-                            }
-                          >
-                            👁 View
-                          </button>
-
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() =>
-                              navigate(`/employer/edit-job/${job.id}`)
-                            }
-                          >
-                            ✏️ Edit
-                          </button>
-
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleDelete(job.id)}
-                          >
-                            🗑 Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+        ) : jobs.length === 0 ? (
+          <div className="db-empty">
+            <span className="db-ico blue">
+              <FaBriefcase />
+            </span>
+            <h5>No jobs posted yet</h5>
+            <p>Start posting jobs to find the right candidates.</p>
+            <Link to="/employer/add-job" className="btn btn-primary">
+              Post your first job
+            </Link>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="table-responsive">
+            <table className="db-table">
+              <thead>
+                <tr>
+                  <th>Job</th>
+                  <th>Location</th>
+                  <th>Salary</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {jobs.map((job) => (
+                  <tr key={job.id}>
+                    <td>
+                      <div className="db-cell-title">
+                        {job.title || "Untitled job"}
+                      </div>
+                      <div className="db-cell-sub">
+                        {job.company || "Company not specified"}
+                        {job.jobType ? ` · ${job.jobType}` : ""}
+                      </div>
+                    </td>
+                    <td>{job.location || "Not specified"}</td>
+                    <td>{formatSalary(job.salary) || "Not specified"}</td>
+                    <td>
+                      <StatusBadge status={job.status} fallback="ACTIVE" />
+                    </td>
+                    <td className="db-actions-cell">
+                      <div className="db-row-actions">
+                        <Link
+                          to={`/employer/view-job/${job.id}`}
+                          className="btn btn-outline-primary btn-sm"
+                        >
+                          <FaEye /> View
+                        </Link>
+                        <Link
+                          to={`/employer/edit-job/${job.id}`}
+                          className="btn btn-outline-secondary btn-sm"
+                        >
+                          <FaPen /> Edit
+                        </Link>
+                        <button
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => handleDelete(job.id)}
+                        >
+                          <FaTrashAlt /> Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

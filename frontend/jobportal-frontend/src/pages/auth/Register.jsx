@@ -85,7 +85,7 @@ function Register() {
   return (
     <AuthLayout>
       <div className="login-form">
-        <h2>Create Account 🚀</h2>
+        <h2>Create account</h2>
 
         <p className="auth-subtitle">
           Join JobPortal and start your career journey.

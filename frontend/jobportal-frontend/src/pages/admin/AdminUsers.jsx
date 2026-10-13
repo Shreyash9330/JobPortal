@@ -1,34 +1,36 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+import { FaUserShield, FaSearch, FaTrashAlt } from "react-icons/fa";
+import StatusBadge from "../../components/StatusBadge";
+import "../../styles/dashboard.css";
 
 function AdminUsers() {
-  const navigate = useNavigate();
-
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("/api/users");
+        setUsers(response.data);
+      } catch (error) {
+        console.log("Users Error:", error);
+
+        Swal.fire({
+          icon: "error",
+          title: "Failed to Load Users",
+          text: "Unable to fetch users.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchUsers();
   }, []);
-
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get("/api/users");
-      setUsers(response.data);
-    } catch (error) {
-      console.log("Users Error:", error);
-
-      Swal.fire({
-        icon: "error",
-        title: "Failed to Load Users",
-        text: "Unable to fetch users.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const deleteUser = async (id, name) => {
     const result = await Swal.fire({
@@ -47,7 +49,7 @@ function AdminUsers() {
     try {
       await axios.delete(`/api/users/${id}`);
 
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
+      setUsers((prev) => prev.filter((user) => user.id !== id));
 
       Swal.fire({
         icon: "success",
@@ -67,103 +69,109 @@ function AdminUsers() {
     }
   };
 
+  const q = query.trim().toLowerCase();
+  const visible = users.filter(
+    (u) =>
+      !q ||
+      (u.name || "").toLowerCase().includes(q) ||
+      (u.email || "").toLowerCase().includes(q) ||
+      (u.role || "").toLowerCase().includes(q),
+  );
+
   return (
-    <div className="container mt-5">
-      {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div className="db-page">
+      <div className="db-head">
         <div>
-          <p className="text-primary fw-semibold mb-1">👥 Administration</p>
-
-          <h2 className="fw-bold mb-1">Manage Users</h2>
-
-          <p className="text-muted mb-0">
-            View and manage registered users and their roles.
-          </p>
+          <div className="db-eyebrow">
+            <FaUserShield /> Administration
+          </div>
+          <h1>Manage users</h1>
+          <p>View registered users and their roles.</p>
         </div>
 
-        <button
-          className="btn btn-outline-primary"
-          onClick={() => navigate("/admin")}
-        >
-          ← Dashboard
-        </button>
+        <div className="db-head-actions">
+          <Link to="/admin" className="btn btn-outline-primary">
+            ← Dashboard
+          </Link>
+        </div>
       </div>
 
-      {/* Users Card */}
-      <div className="card border-0 shadow-sm rounded-4">
-        <div className="card-body p-0">
-          <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0">
-              <thead className="table-dark">
+      <div className="db-card">
+        <div className="db-toolbar">
+          <div className="db-search">
+            <FaSearch />
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search name, email or role"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search users"
+            />
+          </div>
+        </div>
+
+        <div className="table-responsive">
+          <table className="db-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {loading ? (
                 <tr>
-                  <th className="px-4">ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th className="text-center">Actions</th>
+                  <td colSpan="5" className="text-center py-5">
+                    <div className="spinner-border text-primary" />
+                    <p className="db-cell-sub mt-2 mb-0">Loading users...</p>
+                  </td>
                 </tr>
-              </thead>
-
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan="5" className="text-center py-5">
-                      <div className="spinner-border text-primary"></div>
-                      <p className="text-muted mt-2 mb-0">Loading users...</p>
+              ) : visible.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="text-center py-5 db-cell-sub">
+                    No users found.
+                  </td>
+                </tr>
+              ) : (
+                visible.map((user) => (
+                  <tr key={user.id}>
+                    <td className="db-cell-sub">{user.id}</td>
+                    <td className="db-cell-title">{user.name || "—"}</td>
+                    <td>{user.email}</td>
+                    <td>
+                      <StatusBadge status={user.role} />
                     </td>
-                  </tr>
-                ) : users.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="text-center py-5 text-muted">
-                      No users found.
-                    </td>
-                  </tr>
-                ) : (
-                  users.map((user) => (
-                    <tr key={user.id}>
-                      <td className="px-4 fw-semibold">{user.id}</td>
-
-                      <td>{user.name || "—"}</td>
-
-                      <td>{user.email}</td>
-
-                      <td>
-                        <span
-                          className={`badge ${
-                            user.role === "ADMIN"
-                              ? "bg-danger"
-                              : user.role === "EMPLOYER"
-                                ? "bg-success"
-                                : "bg-primary"
-                          }`}
-                        >
-                          {user.role}
-                        </span>
-                      </td>
-
-                      <td className="text-center">
+                    <td className="db-actions-cell">
+                      {user.role === "ADMIN" ? (
+                        <span className="db-cell-sub">Protected</span>
+                      ) : (
                         <button
                           className="btn btn-outline-danger btn-sm"
                           onClick={() => deleteUser(user.id, user.name)}
                         >
-                          🗑 Delete
+                          <FaTrashAlt className="me-1" />
+                          Delete
                         </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      </div>
 
-      {/* Count */}
-      {!loading && (
-        <p className="text-muted mt-3">
-          Total Users: <strong>{users.length}</strong>
-        </p>
-      )}
+        {!loading && (
+          <div className="db-foot">
+            Showing {visible.length} of {users.length} users
+          </div>
+        )}
+      </div>
     </div>
   );
 }

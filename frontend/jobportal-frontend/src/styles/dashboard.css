@@ -303,3 +303,53 @@
     padding: 12px 14px;
   }
 }
+
+/* ---------- Extra badge tones ---------- */
+.db-badge.primary { background: var(--jp-primary-soft); color: var(--jp-primary-ink); }
+.db-badge.info { background: #dcf1fb; color: #0b6b94; }
+
+/* ---------- Toolbar (search + tabs) ---------- */
+.db-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 20px; border-bottom: 1px solid var(--jp-line); }
+.db-toolbar .db-tabs { padding: 0; border: 0; }
+.db-search { position: relative; min-width: 240px; flex: 1; max-width: 340px; }
+.db-search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--jp-muted); pointer-events: none; }
+.db-search input { padding-left: 40px; border-radius: 999px; min-height: 40px; }
+.db-foot { padding: 12px 20px; border-top: 1px solid var(--jp-line); color: var(--jp-muted); font-size: 0.85rem; background: var(--jp-bg); }
+
+/* ---------- Row actions ---------- */
+.db-row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.db-row-actions .btn { display: inline-flex; align-items: center; gap: 6px; }
+.db-table td.db-actions-cell { white-space: nowrap; }
+
+/* ---------- Details (ViewJob) ---------- */
+.db-detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 20px; }
+.db-detail { padding: 14px 16px; border: 1px solid var(--jp-line); border-radius: 12px; background: var(--jp-bg); }
+.db-detail small { display: block; color: var(--jp-muted); margin-bottom: 4px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+.db-detail strong { color: var(--jp-ink); }
+.db-section { padding: 0 20px 20px; }
+.db-section h4 { font-size: 1rem; font-weight: 700; margin: 6px 0 12px; }
+.db-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.db-chip { background: var(--jp-primary-soft); color: var(--jp-primary-ink); border-radius: 999px; padding: 5px 14px; font-size: 0.82rem; font-weight: 600; }
+.db-desc { white-space: pre-line; color: var(--jp-ink); margin: 0; }
+
+/* ---------- Form card ---------- */
+.db-form-wrap { max-width: 760px; margin: 0 auto; }
+.db-form { padding: 24px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.db-form .full { grid-column: 1 / -1; }
+.db-form label { font-weight: 600; font-size: 0.88rem; margin-bottom: 6px; display: block; }
+.db-form .req { color: var(--jp-danger, #dc2626); }
+.db-form-actions { display: flex; gap: 10px; justify-content: flex-end; padding: 16px 24px; border-top: 1px solid var(--jp-line); background: var(--jp-bg); }
+
+/* ---------- Role cards (register choice) ---------- */
+.role-card { display: flex; gap: 14px; align-items: flex-start; text-align: left; width: 100%; padding: 18px; margin-bottom: 14px; border: 1px solid var(--jp-line); border-radius: 16px; background: #fff; text-decoration: none; color: var(--jp-ink); transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s; }
+.role-card:hover { border-color: #c7d6ff; box-shadow: var(--jp-shadow); transform: translateY(-2px); color: var(--jp-ink); }
+.role-card h4 { font-size: 1.05rem; font-weight: 700; margin: 0 0 4px; }
+.role-card p { margin: 0; color: var(--jp-muted); font-size: 0.88rem; }
+
+@media (max-width: 640px) {
+  .db-form { grid-template-columns: 1fr; padding: 18px; }
+  .db-detail-grid { grid-template-columns: 1fr; }
+  .db-form-actions { flex-direction: column-reverse; }
+  .db-form-actions .btn { width: 100%; }
+  .db-search { max-width: none; }
+}

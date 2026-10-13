@@ -1,59 +1,58 @@
 import { API_URL } from "../../config";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+import { FaInbox, FaCheck, FaTimes } from "react-icons/fa";
+import StatusBadge from "../../components/StatusBadge";
+import "../../styles/dashboard.css";
+
+const FILTERS = ["ALL", "APPLIED", "APPROVED", "REJECTED"];
 
 function EmployerApplications() {
-  const navigate = useNavigate();
-
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [filter, setFilter] = useState("ALL");
+  const [reloadKey, setReloadKey] = useState(0);
 
   const employerEmail = localStorage.getItem("email");
   const token = localStorage.getItem("token");
 
   useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        setLoading(true);
+        setError(false);
+
+        const response = await axios.get(
+          `/api/applications/employer/${employerEmail}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+
+        setApplications(response.data);
+      } catch (err) {
+        console.log("Applications Error:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchApplications();
-  }, []);
-
-  const fetchApplications = async () => {
-    try {
-      const response = await axios.get(
-        `/api/applications/employer/${employerEmail}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      setApplications(response.data);
-    } catch (error) {
-      console.log("Applications Error:", error);
-
-      Swal.fire({
-        icon: "error",
-        title: "Unable to Load Applications",
-        text: "Something went wrong while loading applications.",
-        confirmButtonColor: "#dc3545",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [employerEmail, token, reloadKey]);
 
   const updateStatus = async (id, status) => {
-    const actionText = status === "APPROVED" ? "approve" : "reject";
+    const approve = status === "APPROVED";
 
     const result = await Swal.fire({
-      title: `${status === "APPROVED" ? "Approve" : "Reject"} Application?`,
-      text: `Are you sure you want to ${actionText} this application?`,
+      title: `${approve ? "Approve" : "Reject"} application?`,
+      text: `Are you sure you want to ${approve ? "approve" : "reject"} this application?`,
       icon: "question",
       showCancelButton: true,
-      confirmButtonColor: status === "APPROVED" ? "#198754" : "#dc3545",
+      confirmButtonColor: approve ? "#198754" : "#dc3545",
       cancelButtonColor: "#6c757d",
-      confirmButtonText: status === "APPROVED" ? "Yes, Approve" : "Yes, Reject",
+      confirmButtonText: approve ? "Yes, Approve" : "Yes, Reject",
       cancelButtonText: "Cancel",
     });
 
@@ -63,137 +62,141 @@ function EmployerApplications() {
       const response = await axios.put(
         `/api/applications/${id}/status?status=${status}`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      setApplications((prevApplications) =>
-        prevApplications.map((app) =>
+      setApplications((prev) =>
+        prev.map((app) =>
           app.id === id ? { ...app, status: response.data.status } : app,
         ),
       );
 
       Swal.fire({
         icon: "success",
-        title: "Status Updated",
-        text:
-          status === "APPROVED"
-            ? "Application approved successfully."
-            : "Application rejected successfully.",
+        title: "Status updated",
+        text: approve
+          ? "Application approved successfully."
+          : "Application rejected successfully.",
         timer: 1500,
         showConfirmButton: false,
       });
-    } catch (error) {
-      console.log("Update Status Error:", error);
+    } catch (err) {
+      console.log("Update Status Error:", err);
 
       Swal.fire({
         icon: "error",
-        title: "Update Failed",
+        title: "Update failed",
         text: "Unable to update application status.",
         confirmButtonColor: "#dc3545",
       });
     }
   };
 
-  const getStatusBadge = (status) => {
-    const currentStatus = status?.toUpperCase() || "APPLIED";
+  const statusOf = (a) => (a.status || "APPLIED").toUpperCase();
 
-    if (currentStatus === "APPROVED") {
-      return <span className="badge bg-success px-3 py-2">APPROVED</span>;
-    }
+  const countFor = (f) =>
+    f === "ALL"
+      ? applications.length
+      : applications.filter((a) => statusOf(a) === f).length;
 
-    if (currentStatus === "REJECTED") {
-      return <span className="badge bg-danger px-3 py-2">REJECTED</span>;
-    }
-
-    return (
-      <span className="badge bg-warning text-dark px-3 py-2">APPLIED</span>
-    );
-  };
+  const visible = [...applications]
+    .sort((a, b) => b.id - a.id)
+    .filter((a) => filter === "ALL" || statusOf(a) === filter);
 
   if (loading) {
     return (
-      <div className="container py-5">
-        <div className="text-center">
-          <div className="spinner-border text-primary mb-3"></div>
-          <h5>Loading Applications...</h5>
+      <div className="db-page">
+        <div className="db-loading">
+          <div className="spinner-border text-primary" />
+          <span>Loading applications...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container py-5">
-      {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div className="db-page">
+      <div className="db-head">
         <div>
-          <h2 className="fw-bold mb-1">📄 Applications Received</h2>
-
-          <p className="text-muted mb-0">
-            Review and manage applications received for your jobs.
-          </p>
+          <div className="db-eyebrow">Employer</div>
+          <h1>Applications received</h1>
+          <p>Review and manage applications for your jobs.</p>
         </div>
 
-        <button
-          className="btn btn-secondary"
-          onClick={() => navigate("/employer/dashboard")}
-        >
-          Dashboard
-        </button>
+        <div className="db-head-actions">
+          <Link to="/employer/dashboard" className="btn btn-outline-primary">
+            Dashboard
+          </Link>
+        </div>
       </div>
 
-      {/* Empty State */}
-      {applications.length === 0 ? (
-        <div className="card border-0 shadow-sm rounded-4">
-          <div className="card-body text-center py-5">
-            <div style={{ fontSize: "50px" }}>📄</div>
-
-            <h4 className="fw-bold mt-3">No Applications Found</h4>
-
-            <p className="text-muted">
-              You haven't received any job applications yet.
-            </p>
-
+      <div className="db-card">
+        {error ? (
+          <div className="db-empty">
+            <span className="db-ico red">
+              <FaInbox />
+            </span>
+            <h5>Couldn&apos;t load applications</h5>
+            <p>The server may be waking up. Please try again.</p>
             <button
               className="btn btn-primary"
-              onClick={() => navigate("/employer/add-job")}
+              onClick={() => setReloadKey((k) => k + 1)}
             >
-              Post a New Job
+              Retry
             </button>
           </div>
-        </div>
-      ) : (
-        <div className="card border-0 shadow-sm rounded-4">
-          <div className="card-body p-0">
+        ) : applications.length === 0 ? (
+          <div className="db-empty">
+            <span className="db-ico blue">
+              <FaInbox />
+            </span>
+            <h5>No applications yet</h5>
+            <p>You haven&apos;t received any applications yet.</p>
+            <Link to="/employer/add-job" className="btn btn-primary">
+              Post a job
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="db-tabs">
+              {FILTERS.map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  className={`db-tab ${filter === f ? "active" : ""}`}
+                  onClick={() => setFilter(f)}
+                >
+                  {f === "ALL" ? "All" : f[0] + f.slice(1).toLowerCase()} (
+                  {countFor(f)})
+                </button>
+              ))}
+            </div>
+
             <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-dark">
+              <table className="db-table">
+                <thead>
                   <tr>
-                    <th className="px-3 py-3">Job Title</th>
-                    <th>Applicant Email</th>
+                    <th>Job</th>
+                    <th>Applicant</th>
                     <th>Status</th>
                     <th>Resume</th>
-                    <th className="text-center">Actions</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {applications.map((app) => {
-                    const status = app.status?.toUpperCase();
+                  {visible.map((app) => {
+                    const status = statusOf(app);
 
                     return (
                       <tr key={app.id}>
-                        <td className="px-3 fw-semibold">
-                          {app.jobTitle || "Job Title Not Available"}
+                        <td className="db-cell-title">
+                          {app.jobTitle || "Job title not available"}
                         </td>
-
-                        <td>{app.userEmail || "Not Available"}</td>
-
-                        <td>{getStatusBadge(app.status)}</td>
-
+                        <td>{app.userEmail || "Not available"}</td>
+                        <td>
+                          <StatusBadge status={app.status} />
+                        </td>
                         <td>
                           {app.resumePath ? (
                             <a
@@ -202,51 +205,47 @@ function EmployerApplications() {
                               rel="noreferrer"
                               className="btn btn-outline-primary btn-sm"
                             >
-                              📄 View Resume
+                              View resume
                             </a>
                           ) : (
-                            <span className="text-muted">Not Available</span>
+                            <span className="db-cell-sub">Not available</span>
                           )}
                         </td>
-
-                        <td>
-                          <div className="d-flex justify-content-center gap-2 flex-wrap">
-                            {status === "APPROVED" ? (
-                              <span className="badge bg-success px-3 py-2">
-                                ✓ Approved
-                              </span>
-                            ) : (
-                              <button
-                                className="btn btn-success btn-sm"
-                                onClick={() => updateStatus(app.id, "APPROVED")}
-                              >
-                                ✓ Approve
-                              </button>
-                            )}
-
-                            {status === "REJECTED" ? (
-                              <span className="badge bg-danger px-3 py-2">
-                                ✕ Rejected
-                              </span>
-                            ) : (
-                              <button
-                                className="btn btn-danger btn-sm"
-                                onClick={() => updateStatus(app.id, "REJECTED")}
-                              >
-                                ✕ Reject
-                              </button>
-                            )}
+                        <td className="db-actions-cell">
+                          <div className="db-row-actions">
+                            <button
+                              className="btn btn-success btn-sm"
+                              disabled={status === "APPROVED"}
+                              onClick={() => updateStatus(app.id, "APPROVED")}
+                            >
+                              <FaCheck /> Approve
+                            </button>
+                            <button
+                              className="btn btn-outline-danger btn-sm"
+                              disabled={status === "REJECTED"}
+                              onClick={() => updateStatus(app.id, "REJECTED")}
+                            >
+                              <FaTimes /> Reject
+                            </button>
                           </div>
                         </td>
                       </tr>
                     );
                   })}
+
+                  {visible.length === 0 && (
+                    <tr>
+                      <td colSpan="5" className="text-center db-cell-sub py-4">
+                        No applications in this filter.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -22,7 +22,6 @@ import EmployerApplications from "./pages/employer/EmployerApplications";
 import CompanyProfile from "./pages/employer/CompanyProfile";
 import EditCompanyProfile from "./pages/employer/EditCompanyProfile";
 import EmployerDashboard from "./pages/employer/EmployerDashboard";
-import ViewApplications from "./pages/employer/ViewApplications";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -208,14 +207,6 @@ function App() {
           }
         />
 
-        <Route
-          path="/view-applications"
-          element={
-            <ProtectedRoute role={"ADMIN"}>
-              <ViewApplications />
-            </ProtectedRoute>
-          }
-        />
 
         {/* ================= FALLBACK ================= */}
 

@@ -126,7 +126,7 @@ function EmployerRegister() {
   return (
     <AuthLayout>
       <div className="login-form">
-        <h2>Create Employer Account 🏢</h2>
+        <h2>Create employer account</h2>
 
         <p className="auth-subtitle">
           Register your company and start hiring talented professionals.

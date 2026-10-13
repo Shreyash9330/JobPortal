@@ -144,7 +144,7 @@ function JobSeekerRegister() {
   return (
     <AuthLayout>
       <div className="login-form">
-        <h2>Create Job Seeker Account 👨‍💼</h2>
+        <h2>Create job seeker account</h2>
 
         <p className="auth-subtitle">
           Create your profile and start applying for jobs.
