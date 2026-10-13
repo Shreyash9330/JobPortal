@@ -31,9 +31,7 @@ function Navbar() {
     <header className="sn-wrap">
       <nav className="sn-bar" aria-label="Main">
         <Link to="/" className="sn-brand" onClick={close}>
-          <Link to="/" className="sn-brand" onClick={close}>
-            <Logo />
-          </Link>
+          <Logo />
         </Link>
 
         <button

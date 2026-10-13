@@ -1,25 +1,23 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
-import Swal from "sweetalert2";
 import {
   FaUsers,
   FaBuilding,
   FaBriefcase,
   FaFileAlt,
   FaUserShield,
+  FaArrowRight,
 } from "react-icons/fa";
+import "../../styles/dashboard.css";
 
 function AdminDashboard() {
-  const navigate = useNavigate();
-
   const [stats, setStats] = useState({
     users: 0,
     employers: 0,
     jobs: 0,
     applications: 0,
   });
-
   const [loading, setLoading] = useState(true);
 
   const token = localStorage.getItem("token");
@@ -27,11 +25,15 @@ function AdminDashboard() {
   useEffect(() => {
     const loadStats = async () => {
       try {
+        const config = token
+          ? { headers: { Authorization: `Bearer ${token}` } }
+          : {};
+
         const results = await Promise.allSettled([
-          axios.get("/api/users/count"),
-          axios.get("/api/employer"),
-          axios.get("/api/jobs/count"),
-          axios.get("/api/applications/count"),
+          axios.get("/api/users/count", config),
+          axios.get("/api/employer", config),
+          axios.get("/api/jobs/count", config),
+          axios.get("/api/applications/count", config),
         ]);
 
         const [u, e, j, a] = results.map((r) =>
@@ -52,203 +54,95 @@ function AdminDashboard() {
     };
 
     loadStats();
-  }, []);
-
-  const handleLogout = async () => {
-    const result = await Swal.fire({
-      title: "Logout?",
-      text: "Do you want to logout from the admin account?",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#dc3545",
-      cancelButtonColor: "#6c757d",
-      confirmButtonText: "Yes, Logout",
-      cancelButtonText: "Cancel",
-    });
-
-    if (!result.isConfirmed) return;
-
-    localStorage.removeItem("token");
-    localStorage.removeItem("email");
-    localStorage.removeItem("role");
-
-    navigate("/login");
-  };
+  }, [token]);
 
   const statItems = [
     {
       icon: <FaUsers />,
+      tone: "blue",
       value: stats.users,
-      label: "Registered Users",
-      className: "text-primary",
+      label: "Registered users",
     },
     {
       icon: <FaBuilding />,
+      tone: "green",
       value: stats.employers,
       label: "Employers",
-      className: "text-success",
     },
     {
       icon: <FaBriefcase />,
+      tone: "amber",
       value: stats.jobs,
-      label: "Jobs Posted",
-      className: "text-warning",
+      label: "Jobs posted",
     },
     {
       icon: <FaFileAlt />,
+      tone: "teal",
       value: stats.applications,
       label: "Applications",
-      className: "text-info",
+    },
+  ];
+
+  const actions = [
+    {
+      to: "/admin/users",
+      icon: <FaUsers />,
+      tone: "blue",
+      title: "Manage users",
+      text: "View registered users and their roles.",
+    },
+    {
+      to: "/admin/applications",
+      icon: <FaFileAlt />,
+      tone: "teal",
+      title: "Manage applications",
+      text: "Review applications and update their status.",
+    },
+    {
+      to: "/jobs",
+      icon: <FaBriefcase />,
+      tone: "amber",
+      title: "Manage jobs",
+      text: "View, edit and remove jobs on the platform.",
     },
   ];
 
   return (
-    <div className="container-fluid py-4 px-3 px-lg-5">
-      {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div className="db-page">
+      <div className="db-head">
         <div>
-          <p className="text-primary fw-semibold mb-1">
-            <FaUserShield className="me-2" />
-            Administration
-          </p>
-
-          <h2 className="fw-bold mb-1">Admin Dashboard</h2>
-
-          <p className="text-muted mb-0">
-            Manage users, jobs, employers, and applications.
-          </p>
+          <div className="db-eyebrow">
+            <FaUserShield /> Administration
+          </div>
+          <h1>Admin dashboard</h1>
+          <p>Manage users, jobs, employers and applications.</p>
         </div>
-
-        <button className="btn btn-danger px-4" onClick={handleLogout}>
-          Logout
-        </button>
       </div>
 
-      {/* Statistics */}
-      <div className="row g-4 mb-5">
-        {statItems.map((item, index) => (
-          <div className="col-xl-3 col-md-6" key={index}>
-            <div className="card border-0 shadow-sm rounded-4 h-100">
-              <div className="card-body p-4">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h3 className="fw-bold mb-1">
-                      {loading ? "..." : item.value}
-                    </h3>
-
-                    <p className="text-muted mb-0">{item.label}</p>
-                  </div>
-
-                  <div className={`fs-2 ${item.className}`}>{item.icon}</div>
-                </div>
-              </div>
+      <div className="db-stats">
+        {statItems.map((s) => (
+          <div className="db-stat" key={s.label}>
+            <span className={`db-ico ${s.tone}`}>{s.icon}</span>
+            <div>
+              <strong>{loading ? "…" : s.value}</strong>
+              <span>{s.label}</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="mb-4">
-        <h4 className="fw-bold mb-4">Quick Actions</h4>
-
-        <div className="row g-4">
-          {/* Manage Users */}
-          <div className="col-lg-4 col-md-6">
-            <div className="card border-0 shadow-sm rounded-4 h-100">
-              <div className="card-body p-4">
-                <div className="fs-2 text-primary mb-3">👥</div>
-
-                <h5 className="fw-bold">Manage Users</h5>
-
-                <p className="text-muted">
-                  View and manage registered users and their roles.
-                </p>
-
-                <button
-                  className="btn btn-primary"
-                  onClick={() => navigate("/admin/users")}
-                >
-                  Manage Users →
-                </button>
-              </div>
+      <h3 className="db-title">Quick actions</h3>
+      <div className="db-actions">
+        {actions.map((a) => (
+          <Link to={a.to} className="db-action" key={a.to}>
+            <span className={`db-ico ${a.tone}`}>{a.icon}</span>
+            <div>
+              <h4>{a.title}</h4>
+              <p>{a.text}</p>
             </div>
-          </div>
-
-          {/* Applications */}
-          <div className="col-lg-4 col-md-6">
-            <div className="card border-0 shadow-sm rounded-4 h-100">
-              <div className="card-body p-4">
-                <div className="fs-2 text-info mb-3">📄</div>
-
-                <h5 className="fw-bold">Manage Applications</h5>
-
-                <p className="text-muted">
-                  Review job applications submitted by job seekers.
-                </p>
-
-                <button
-                  className="btn btn-info text-white"
-                  onClick={() => navigate("/admin/applications")}
-                >
-                  View Applications →
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Jobs */}
-          <div className="col-lg-4 col-md-6">
-            <div className="card border-0 shadow-sm rounded-4 h-100">
-              <div className="card-body p-4">
-                <div className="fs-2 text-warning mb-3">💼</div>
-
-                <h5 className="fw-bold">Manage Jobs</h5>
-
-                <p className="text-muted">
-                  View, edit, and remove jobs posted on the platform.
-                </p>
-
-                <button
-                  className="btn btn-warning"
-                  onClick={() => navigate("/jobs")}
-                >
-                  Manage Jobs →
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* System Summary */}
-      <div className="card border-0 shadow-sm rounded-4 mt-4">
-        <div className="card-body p-4">
-          <h5 className="fw-bold mb-3">📊 System Overview</h5>
-
-          <div className="row text-center">
-            <div className="col-md-3 col-6 mb-3 mb-md-0">
-              <h4 className="fw-bold">{loading ? "..." : stats.users}</h4>
-              <small className="text-muted">Users</small>
-            </div>
-
-            <div className="col-md-3 col-6 mb-3 mb-md-0">
-              <h4 className="fw-bold">{loading ? "..." : stats.employers}</h4>
-              <small className="text-muted">Employers</small>
-            </div>
-
-            <div className="col-md-3 col-6">
-              <h4 className="fw-bold">{loading ? "..." : stats.jobs}</h4>
-              <small className="text-muted">Jobs</small>
-            </div>
-
-            <div className="col-md-3 col-6">
-              <h4 className="fw-bold">
-                {loading ? "..." : stats.applications}
-              </h4>
-              <small className="text-muted">Applications</small>
-            </div>
-          </div>
-        </div>
+            <FaArrowRight className="db-go" />
+          </Link>
+        ))}
       </div>
     </div>
   );
