@@ -1,303 +1,185 @@
-# 💼 Job Portal
+<div align="center">
 
-A full-stack Job Portal web application built with **React.js, Spring Boot, Spring Security, JWT, Hibernate, and MySQL**.
+# 💼 JobPortal
 
-The platform provides separate workflows for **Job Seekers, Employers, and Administrators**, including authentication, job management, job search and filtering, job applications, resume upload, application tracking, company profiles, and dashboards.
+**A full-stack job portal with role-based dashboards for Job Seekers, Employers and Admins.**
 
-## 📌 Project Overview
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000?logo=vercel)](https://job-portal-six-henna-58.vercel.app)
+[![API Docs](https://img.shields.io/badge/API%20Docs-Swagger-85EA2D?logo=swagger&logoColor=000)](https://jobportal-neqm.onrender.com/swagger-ui.html)
+[![CI](https://github.com/Shreyash9330/JobPortal/actions/workflows/ci.yml/badge.svg)](https://github.com/Shreyash9330/JobPortal/actions/workflows/ci.yml)
+![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4-6DB33F?logo=springboot&logoColor=fff)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=000)
+![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=fff)
 
-The Job Portal connects job seekers and employers through a centralized web application.
+[**Live demo**](https://job-portal-six-henna-58.vercel.app) · [**Swagger API docs**](https://jobportal-neqm.onrender.com/swagger-ui.html) · [**Report a bug**](https://github.com/Shreyash9330/JobPortal/issues)
 
-### Job Seeker Features
-- Register and login securely
-- Browse available jobs
-- Search by job title and location
-- Filter by job type and experience
-- View complete job details
-- Apply for jobs
-- Upload PDF resumes
-- Prevent duplicate applications
-- Track application status
-- View application history
-- Use a personalized dashboard
+![Home page](docs/screenshots/home.png)
 
-### Employer Features
-- Register as an employer
-- Create and manage company profile
-- Post new jobs
-- Edit and delete jobs
-- View employer-specific jobs
-- View applications received
-- Approve or reject applications
-- View applicant resumes
-- Track jobs and applications from dashboard
+</div>
 
-### Admin Features
-- Role-based admin login
-- View all registered users
-- View user roles
-- Delete users
-- View all applications
-- Monitor jobs and platform statistics
-- Manage platform-level user and application information
+> **Heads-up:** the backend runs on Render's free tier, so it sleeps after ~15 minutes of inactivity. The first request can take **30–60 seconds** to wake it up (the UI shows a "Server is waking up" notice). After that it is fast.
 
-## ✨ Core Features
+## 🔑 Try it in 30 seconds
 
-### Authentication & Security
-- User registration
-- Job seeker registration
-- Employer registration
-- JWT-based authentication
-- Role-based authorization
-- Roles: `ADMIN`, `EMPLOYER`, `JOBSEEKER`
-- BCrypt password hashing
-- Protected frontend routes
-- Role-based dashboard redirection
-- Logout
-- Invalid-token handling
-- Sensitive application configuration excluded from Git
+Open the [live demo](https://job-portal-six-henna-58.vercel.app) → **Login** → click a demo chip, or use:
 
-### Job Management
-- Create, read, update and delete jobs
-- Job title, company, location, salary, experience and job type
-- Required skills and description
-- Active job status
-- Employer-specific job listing
+| Role | Email | Password |
+|---|---|---|
+| Job Seeker | `seeker@jobportal.com` | `Demo@1234` |
+| Employer | `employer@jobportal.com` | `Demo@1234` |
+| Admin | `admin@jobportal.com` | `Demo@1234` |
 
-### Job Search & Filtering
-- Search by title
-- Search by location
-- Filter by job type
-- Filter by experience
-- Clear filters
+These are shared demo accounts with fake data. Please don't upload personal documents.
 
-### Applications
-- Apply for jobs
-- Upload resume
-- PDF and file-size validation
-- Duplicate application check
-- Track application status
-- Employer approval/rejection
-- Resume viewing by employer/admin
+## ✨ Features
 
-### Company Profiles
-- Company name
-- HR name
-- Phone
-- Website
-- Industry
-- Company size
-- Company description
-- View and edit profile
+**Job Seeker**
+- Register, log in, reset password with an emailed OTP
+- Search jobs by title/keyword, location and job type
+- View job details and apply with a PDF resume (duplicate applications blocked)
+- Track every application and its status (Applied → Shortlisted → Selected/Rejected) with filter tabs
+- Personal dashboard with quick actions
 
-### Dashboards
-- Job seeker dashboard
-- Employer dashboard
-- Admin dashboard
-- Live counts for relevant users/jobs/applications
-- Recent activity sections
-- Quick actions
+**Employer**
+- Register with a company profile; view and edit it
+- Post, edit and delete jobs (type, experience, skills, salary, description)
+- See applicants per job, open their resumes, approve or reject
+- Dashboard with live counts (jobs, applications, pending review)
 
-## 🛠️ Technologies Used
+**Admin**
+- View and search all users, delete non-admin users (admins are protected)
+- View all applications with status tabs and search
+- Platform-wide statistics
 
-### Frontend
-- **React.js** – UI development
-- **JavaScript (ES6+)** – application logic
-- **React Router DOM** – routing
-- **Axios** – REST API communication
-- **Bootstrap** – responsive UI and layout
-- **CSS3** – custom styling
-- **React Icons** – icons
-- **SweetAlert2** – alerts and confirmation dialogs
-- **Vite** – development/build tool
+**Platform**
+- JWT authentication, BCrypt password hashing, role-based authorization (`ADMIN`, `EMPLOYER`, `JOBSEEKER`)
+- Ownership checks (`AccessGuard`): users can only read/modify their own data unless they are admin
+- Resumes are validated (PDF only, `%PDF` signature check, 2 MB limit) and stored in the database, so they survive free-tier restarts
+- Password reset OTP delivered through the Brevo email API (10-minute expiry)
+- Global exception handling with consistent JSON errors
+- Responsive UI (tested down to 320 px), loading, empty and error states
 
-### Backend
-- **Java** – backend development
-- **Spring Boot** – backend framework
-- **Spring MVC** – REST APIs
-- **Spring Data JPA** – database access
-- **Hibernate** – ORM
-- **Spring Security** – authentication and authorization
-- **JWT** – token-based authentication
-- **BCrypt** – password hashing
-- **Maven** – dependency/build management
+## 🖼️ Screenshots
 
-### Database
-- **MySQL** – relational database
-- **JPA/Hibernate** – object-relational mapping
+| Job Seeker dashboard | Employer dashboard |
+|---|---|
+| ![Job seeker](docs/screenshots/jobseeker-dashboard.png) | ![Employer](docs/screenshots/employer-dashboard.png) |
 
-### Development Tools
-- Spring Tools for Eclipse (STS)
-- Visual Studio Code
-- MySQL Workbench
-- Git
-- GitHub
-- npm
+| Admin dashboard | Browse jobs |
+|---|---|
+| ![Admin](docs/screenshots/admin-dashboard.png) | ![Jobs](docs/screenshots/jobs.png) |
+
+| Login | Swagger API docs |
+|---|---|
+| ![Login](docs/screenshots/login.png) | ![Swagger](docs/screenshots/swagger.png) |
+
+## 🛠️ Tech stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, Vite, React Router, Axios, Bootstrap 5, React Icons, SweetAlert2 |
+| Backend | Java 17, Spring Boot 4, Spring MVC, Spring Security, Spring Data JPA (Hibernate), Bean Validation |
+| Auth | JWT (jjwt), BCrypt |
+| Database | MySQL 8 |
+| API docs | springdoc-openapi (Swagger UI) |
+| Email | Brevo transactional email API |
+| Testing | JUnit 5, Mockito, Spring MVC Test, JaCoCo |
+| DevOps | Docker, Docker Compose, GitHub Actions |
+| Hosting | Vercel (frontend), Render (backend), Aiven (MySQL) |
 
 ## 🏗️ Architecture
 
-```text
-React Frontend
-      |
-      | REST API / JSON
-      v
-Spring Boot Backend
-      |
-      +-- Controller
-      +-- Service
-      +-- Repository
-      +-- Entity
-      +-- DTO
-      +-- Security / JWT
-      |
-      v
-Hibernate / JPA
-      |
-      v
-MySQL
+```mermaid
+flowchart LR
+    U[Browser] -->|HTTPS| FE[React + Vite<br/>Vercel]
+    FE -->|REST + JWT| BE[Spring Boot API<br/>Render]
+    BE -->|JPA / Hibernate| DB[(MySQL<br/>Aiven)]
+    BE -->|HTTPS API| MAIL[Brevo<br/>OTP email]
 ```
 
-## 📁 Project Structure
+Backend layers: `controller → service → repository → entity`, with `dto`, `security` (JWT filter, `AccessGuard`), `exception` (global handler) and `config` packages.
 
-```text
-JobPortal/
-├── backend/
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/com/example/demo/
-│   │   │   │   ├── config/
-│   │   │   │   ├── controller/
-│   │   │   │   ├── dto/
-│   │   │   │   ├── entity/
-│   │   │   │   ├── exception/
-│   │   │   │   ├── repository/
-│   │   │   │   ├── security/
-│   │   │   │   ├── service/
-│   │   │   │   └── service/impl/
-│   │   │   └── resources/
-│   │   └── test/
-│   ├── pom.xml
-│   ├── mvnw
-│   └── mvnw.cmd
-├── frontend/
-│   └── jobportal-frontend/
-│       ├── public/
-│       ├── src/
-│       │   ├── assets/
-│       │   ├── components/
-│       │   ├── pages/
-│       │   │   ├── admin/
-│       │   │   ├── auth/
-│       │   │   ├── employer/
-│       │   │   └── jobseeker/
-│       │   ├── services/
-│       │   └── styles/
-│       ├── package.json
-│       ├── package-lock.json
-│       └── vite.config.js
-└── .gitignore
+### Data model
+
+```mermaid
+erDiagram
+    USER ||--o| EMPLOYER_PROFILE : has
+    USER ||--o{ PASSWORD_RESET_TOKEN : requests
+    USER ||--o{ JOB : "posts (employer_email)"
+    USER ||--o{ APPLICATION : "submits (user_email)"
+    JOB ||--o{ APPLICATION : receives
+    APPLICATION }o--|| RESUME_FILE : "resume_path"
+
+    USER { long id string name string email string password enum role boolean enabled }
+    EMPLOYER_PROFILE { long id string company_name string hr_name string phone string website string industry string company_size }
+    JOB { long id string title string company string location string salary string experience enum job_type string skills enum status }
+    APPLICATION { long id long job_id string user_email string resume_path enum status }
+    RESUME_FILE { string id blob data }
 ```
 
-## 🔗 Main REST APIs
+### Security model
 
-### Authentication
-```text
-POST /api/users
-POST /api/login
-```
+| Area | Who can access |
+|---|---|
+| Browse jobs, job details, login, register, forgot/reset password | Public |
+| Apply, upload resume, my applications | `JOBSEEKER` (own data only) |
+| Post/edit/delete jobs, applicants, approve/reject, company profile | `EMPLOYER` (own data only) |
+| All users, all applications, delete users | `ADMIN` |
 
-### Users
-```text
-GET /api/users
-GET /api/users/count
-DELETE /api/users/{id}
-```
+Unauthenticated requests get `401`, authenticated-but-forbidden requests get `403`. This is covered by `SecurityRulesTest`.
 
-### Jobs
-```text
-GET /api/jobs
-GET /api/jobs/{id}
-POST /api/jobs
-PUT /api/jobs/{id}
-DELETE /api/jobs/{id}
-GET /api/jobs/filter
-GET /api/jobs/employer/{email}
-GET /api/jobs/count
-```
+## 🔗 API overview
 
-### Applications
-```text
-POST /api/applications
-GET /api/applications
-GET /api/applications/user/{email}
-GET /api/applications/employer/{email}
-GET /api/applications/check
-PUT /api/applications/{id}/status
-POST /api/applications/upload
-```
+Full interactive docs: **[Swagger UI](https://jobportal-neqm.onrender.com/swagger-ui.html)**. Use the **Authorize** button and paste the token returned by `/api/login`.
 
-### Employer
-```text
-GET /api/employer
-GET /api/employer/{id}
-GET /api/employer/profile/{email}
-POST /api/employer
-PUT /api/employer/{id}
-DELETE /api/employer/{id}
-```
+| Group | Endpoints |
+|---|---|
+| Auth | `POST /api/login`, `POST /api/users`, `POST /api/auth/register/employer`, `POST /api/auth/forgot-password`, `POST /api/auth/reset-password` |
+| Users | `GET /api/users`, `GET /api/users/count`, `DELETE /api/users/{id}` |
+| Jobs | `GET /api/jobs`, `GET /api/jobs/filter`, `GET /api/jobs/{id}`, `POST /api/jobs`, `PUT /api/jobs/{id}`, `DELETE /api/jobs/{id}`, `GET /api/jobs/employer/{email}`, `GET /api/jobs/count` |
+| Applications | `POST /api/applications`, `POST /api/applications/upload`, `GET /api/applications/resume/{file}`, `GET /api/applications/user/{email}`, `GET /api/applications/employer/{email}`, `GET /api/applications/check`, `PUT /api/applications/{id}/status` |
+| Employer | `GET /api/employer`, `GET /api/employer/profile/{email}`, `PUT /api/employer/{id}`, `DELETE /api/employer/{id}` |
+| Stats | `GET /api/stats` (public counts for the home page) |
 
-## 🚀 How to Run
+## 🚀 Run locally
 
-### Prerequisites
-- Java
-- Maven
-- Node.js
-- npm
-- MySQL
-- Git
-
-### 1. Clone
+**Prerequisites:** Java 17, Node.js 20+, MySQL 8 (or Docker), Git.
 
 ```bash
 git clone https://github.com/Shreyash9330/JobPortal.git
 cd JobPortal
 ```
 
-### 2. Backend
+### Option A: Docker Compose (backend + MySQL)
+
+```bash
+cp .env.example .env        # then edit DB_PASSWORD and JWT_SECRET
+docker compose up --build
+```
+
+The API is at `http://localhost:8080`, MySQL on host port `3307`. Start the frontend as shown below.
+
+### Option B: Run everything manually
+
+**1. Database**
+
+```sql
+CREATE DATABASE jobportal;
+```
+
+**2. Backend**
 
 ```bash
 cd backend
+export DB_PASSWORD=your_mysql_password
+export JWT_SECRET=a-random-string-of-at-least-32-characters
+./mvnw spring-boot:run          # Windows (cmd): set the variables with `set`, then mvnw.cmd spring-boot:run
 ```
 
-Configure your local database and JWT settings in:
+Tables are created automatically by Hibernate (`ddl-auto=update`).
 
-```text
-src/main/resources/application.properties
-```
-
-The real configuration file is excluded from GitHub.
-
-Windows:
-
-```cmd
-mvnw.cmd spring-boot:run
-```
-
-Linux/macOS:
-
-```bash
-./mvnw spring-boot:run
-```
-
-Backend:
-
-```text
-http://localhost:8080
-```
-
-### 3. Frontend
-
-Open another terminal:
+**3. Frontend** (new terminal)
 
 ```bash
 cd frontend/jobportal-frontend
@@ -305,146 +187,90 @@ npm install
 npm run dev
 ```
 
-Frontend:
+Open `http://localhost:5173`. By default the frontend talks to `http://localhost:8080`.
+
+### Load demo data (optional)
+
+Creates the three demo users, a company profile and sample jobs. Safe to run more than once.
+
+```bash
+mysql -u root -p jobportal < seed.sql
+```
+
+### Run the tests
+
+```bash
+cd backend
+./mvnw test
+```
+
+The suite has ~45 tests across services, password reset, resume storage and security rules (401/403/role checks).
+
+## ⚙️ Environment variables
+
+**Backend**
+
+| Variable | Required | Description |
+|---|---|---|
+| `DB_URL` | no | JDBC URL, default `jdbc:mysql://localhost:3306/jobportal` |
+| `DB_USERNAME` | no | default `root` |
+| `DB_PASSWORD` | yes | Database password |
+| `JWT_SECRET` | yes | Secret for signing JWTs (32+ random characters) |
+| `APP_CORS_ALLOWED_ORIGINS` | no | Comma-separated allowed frontend origins |
+| `BREVO_API_KEY` | no | Enables real OTP emails. If empty, the OTP is written to the server log |
+| `MAIL_FROM` | no | Verified sender address in Brevo |
+| `PORT` | no | Server port, default `8080` |
+
+**Frontend**
+
+| Variable | Description |
+|---|---|
+| `VITE_API_URL` | Backend base URL, e.g. `https://jobportal-neqm.onrender.com` |
+
+Never commit real secrets. `.env` files are git-ignored.
+
+## ☁️ Deployment
+
+| Part | Service | Notes |
+|---|---|---|
+| Frontend | Vercel | Root directory `frontend/jobportal-frontend`, `VITE_API_URL` set, SPA rewrite in `vercel.json` |
+| Backend | Render (Docker) | Auto-deploys on push to `main`, env vars set in the dashboard |
+| Database | Aiven MySQL | Connection details provided to Render through environment variables |
+
+## 📁 Project structure
 
 ```text
-http://localhost:5173
+JobPortal/
+├── backend/
+│   ├── Dockerfile
+│   ├── pom.xml
+│   └── src/
+│       ├── main/java/com/shreyash/jobportal/
+│       │   ├── config/  controller/  dto/  entity/  enums/
+│       │   ├── exception/  repository/  security/  service/ (+ impl/)
+│       └── test/
+├── frontend/jobportal-frontend/
+│   └── src/
+│       ├── components/  pages/{admin,auth,employer,jobseeker}/
+│       ├── services/  styles/  utils/
+├── docs/screenshots/
+├── docker-compose.yml
+├── seed.sql
+└── .env.example
 ```
 
-## 🗄️ Database Setup
+## 🧭 Roadmap
 
-Example:
+- [ ] Pagination and sorting on job and application lists
+- [ ] Email notifications when an application status changes
+- [ ] Saved/bookmarked jobs for job seekers
+- [ ] Refresh tokens and token revocation
+- [ ] Integration tests with Testcontainers
 
-```sql
-CREATE DATABASE jobportal;
-```
+## 👤 Author
 
-Then configure the local database connection and JWT secret in:
+**Shreyash Gawande**, Java Full Stack Developer, Pune.
 
-```text
-backend/src/main/resources/application.properties
-```
+[GitHub](https://github.com/Shreyash9330) · [LinkedIn](https://linkedin.com/in/shreyash-gawande9330)
 
-Do not commit credentials or JWT secrets to GitHub.
-
-## 🔄 Application Flow
-
-```text
-User
- |
- +-- Register
- |
- +-- Login
- |
- v
-JWT Authentication
- |
- v
-Role Detection
- |
- +----------------+----------------+
- |                |                |
- v                v                v
-JOBSEEKER       EMPLOYER          ADMIN
- |                |                |
- + Browse Jobs    + Post Jobs      + Manage Users
- + Apply Jobs     + Manage Jobs    + View Applications
- + Track Status   + Manage Apps    + Monitor Statistics
-```
-
-## 📱 Responsive UI
-
-The application is designed for:
-- Desktop
-- Tablet
-- Mobile
-
-The navigation includes a mobile menu for smaller screens.
-
-## ✅ Validation & UX
-
-- Required field validation
-- Email validation
-- Password validation
-- Password confirmation
-- Mobile number validation
-- Resume validation
-- Loading states
-- Empty states
-- Error handling
-- Confirmation dialogs
-- Success messages
-- Protected routes
-- Role-based navigation
-- Show/hide password controls
-
-## 🎯 Key Learning Outcomes
-
-This project demonstrates practical experience with:
-- Full-stack web development
-- React component-based architecture
-- REST API development
-- Spring Boot
-- Spring MVC
-- Layered architecture
-- JPA and Hibernate
-- MySQL integration
-- JWT authentication
-- Role-based authorization
-- BCrypt password hashing
-- CRUD operations
-- File upload handling
-- Form validation
-- Axios API integration
-- Exception handling
-- Git and GitHub
-- Responsive UI development
-
-## 🔮 Future Enhancements
-
-- Forgot password / password reset
-- Email notifications
-- Advanced job recommendations
-- Pagination
-- Sorting and advanced filtering
-- Profile photo and company logo upload
-- Cloud-based resume storage
-- Production deployment
-- Improved admin analytics
-- Automated testing
-
-
-
-## 📸 Screenshots
-
-### 💼 Home Page
-![Home Page](Home.png)
-
-### 🔎 Job Listing
-![Job Listing](jobs.png)
-
-### 👤 Job Seeker Dashboard
-![Job Seeker Dashboard](jobseeker-dashboard.png)
-
-### 🏢 Employer Dashboard
-![Employer Dashboard](employer-dashboard.png)
-
-### 👑 Admin Dashboard
-![Admin Dashboard](admin-dashboard.png)
-
-## 👨‍💻 Author
-
-**Shreyash Gawande**
-
-BE - Computer Science & Engineering
-
-GitHub:  
-https://github.com/Shreyash9330
-
-## 📌 Repository
-
-https://github.com/Shreyash9330/JobPortal
-
-## 📄 License
-
-This project was created for learning, portfolio, and demonstration purposes.
+If this project helped you, consider giving it a ⭐.
