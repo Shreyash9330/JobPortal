@@ -19,7 +19,7 @@ jobs:
           java-version: 17
           cache: maven
       - name: Run tests
-        run: ./mvnw -B test
+        run: bash ./mvnw -B test
         env:
           JWT_SECRET: ci-test-secret-ci-test-secret-ci-test-secret
           DB_PASSWORD: unused
