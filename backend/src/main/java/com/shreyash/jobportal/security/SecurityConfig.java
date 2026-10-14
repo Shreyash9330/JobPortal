@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/jobs", "/api/jobs/filter",
                         "/api/jobs/count", "/api/jobs/{id}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/applications/resume/**").permitAll()
-
+                .requestMatchers(HttpMethod.GET, "/api/stats").permitAll()
                 // employer
                 
                 .requestMatchers(HttpMethod.GET, "/api/employer").hasRole("ADMIN")

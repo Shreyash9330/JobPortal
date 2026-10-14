@@ -2,30 +2,22 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/home.css";
 
-const toCount = (data) =>
-  Array.isArray(data) ? data.length : Number(data) || 0;
-
 function Stats() {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
     const load = async () => {
-      const results = await Promise.allSettled([
-        axios.get("/api/users/count"),
-        axios.get("/api/employer"),
-        axios.get("/api/jobs/count"),
-        axios.get("/api/applications/count"),
-      ]);
-
-      const value = (r) =>
-        r.status === "fulfilled" ? toCount(r.value.data) : null;
-
-      setStats([
-        { label: "Registered users", value: value(results[0]) },
-        { label: "Employers", value: value(results[1]) },
-        { label: "Jobs posted", value: value(results[2]) },
-        { label: "Applications", value: value(results[3]) },
-      ]);
+      try {
+        const { data } = await axios.get("/api/stats");
+        setStats([
+          { label: "Registered users", value: data.users },
+          { label: "Employers", value: data.employers },
+          { label: "Jobs posted", value: data.jobs },
+          { label: "Applications", value: data.applications },
+        ]);
+      } catch {
+        setStats([{ label: "", value: null }]);
+      }
     };
 
     load();
